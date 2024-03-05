@@ -18,8 +18,7 @@ infile1=`echo "$PWD"/"$1"`
 infile2=`echo "$PWD"/"$2"`
 outdir=`echo "$infile1" | sed -E "s/merged_table.qza/otu_97/"`
 
-# Cluster at 97% identify
-progress1=`echo "$infile1" | sed -E "s/\/final_qzas\/merged_table.qza//"`
+# Cluster at 97% identity
 progress1=`echo "$infile1" | sed -E "s/(.*\/)//"`
 progress2=`echo "$infile1" | sed -E "s/\/"$progress1"//" | sed -E "s/(.*\/)//"`
 
