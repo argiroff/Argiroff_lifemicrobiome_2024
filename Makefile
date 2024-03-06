@@ -206,5 +206,68 @@ qiime2_16s : $(MANIFEST_16S_OUT) $(IMPORT_16S_OUT) $(SUM_16S_OUT)\
 
 # ITS
 qiime2_its : $(MANIFEST_ITS_OUT) $(IMPORT_ITS_OUT) $(SUM_ITS_OUT)\
-	$(TRIM_ITS_OUT) $(SUM_ITS_TRIM) $(DADA2_ITS) #$(SUM_ITS_DADA2)\
-	# $(MERGE_TAB_ITS) $(MERGE_SEQS_ITS) $(OTU_97_ITS) $(TAX_ITS)
+	$(TRIM_ITS_OUT) $(SUM_ITS_TRIM) $(DADA2_ITS) $(SUM_ITS_DADA2)\
+	$(MERGE_TAB_ITS) $(MERGE_SEQS_ITS) $(OTU_97_ITS) $(TAX_ITS)
+
+#### Format sequence metadata ####
+
+# 16S, BC
+METADATA_16S=data/processed/16S/metadata_working/metadata_16s.txt
+
+$(METADATA_16S) : code/format_metadata.R\
+		$$(MANIFEST_16S_OUT)\
+		data/metadata/tree_age.txt
+	code/format_metadata.R $(MANIFEST_16S_OUT) data/metadata/tree_age.txt $@
+
+# ITS, BC
+METADATA_ITS=data/processed/ITS/metadata_working/metadata_its.txt
+
+$(METADATA_ITS) : code/format_metadata.R\
+		$$(MANIFEST_ITS_OUT)\
+		data/metadata/tree_age.txt
+	code/format_metadata.R $(MANIFEST_ITS_OUT) data/metadata/tree_age.txt $@
+
+#### Tree age ####
+
+# Full dataset
+TREE_AGE=data/processed/environ/tree_age_full.rds
+
+$(TREE_AGE) : code/tree_age.R\
+		data/metadata/tree_age.txt
+	code/tree_age.R data/metadata/tree_age.txt $@
+
+# Site-specific
+TREE_AGE_SITE=data/processed/environ/tree_age_site.rds
+
+$(TREE_AGE_SITE) : code/tree_age_site.R\
+		data/metadata/tree_age.txt\
+		$$(TREE_AGE)
+	code/tree_age_site.R data/metadata/tree_age.txt $(TREE_AGE) $@
+
+#### Metabolites ####
+
+METAB=data/processed/environ/root_metabolites.txt
+
+$(METAB) : code/format_metabolites.R\
+		data/environ/root_metabolites_raw.txt
+	code/format_metabolites.R data/environ/root_metabolites_raw.txt $@
+
+#### Final phyloseq objects ####
+
+# 16S, phyloseq untrimmed
+PS_16S_UNTRIMMED=data/processed/16S/otu_processed/ps_untrimmed.rds
+
+$(PS_16S_UNTRIMMED) : code/make_16s_ps_untrimmed.R\
+		$$(wildcard $$(OTU_97_16S)*.qza)\
+		$$(wildcard $$(TAX_16S)*.qza)\
+		$$(METADATA_16S)
+	code/make_16s_ps_untrimmed.R $(wildcard $(OTU_97_16S)*.qza) $(wildcard $(TAX_16S)*.qza) $(METADATA_16S) $@
+
+# 16S, phyloseq trimmed
+PS_16S_TRIMMED=data/processed/16S/otu_processed/ps_trimmed.rds
+
+$(PS_16S_TRIMMED) : code/make_16s_ps_trimmed.R\
+		$$(PS_16S_UNTRIMMED)
+	code/make_16s_ps_trimmed.R $(PS_16S_UNTRIMMED) $@
+
+metadata : $(METADATA_16S) $(METADATA_ITS) $(TREE_AGE) $(TREE_AGE_SITE) $(METAB) $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED)
