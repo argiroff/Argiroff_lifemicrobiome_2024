@@ -227,23 +227,6 @@ $(METADATA_ITS) : code/format_metadata.R\
 		data/metadata/tree_age.txt
 	code/format_metadata.R $(MANIFEST_ITS_OUT) data/metadata/tree_age.txt $@
 
-#### Tree age ####
-
-# Full dataset
-TREE_AGE=data/processed/environ/tree_age_full.rds
-
-$(TREE_AGE) : code/tree_age.R\
-		data/metadata/tree_age.txt
-	code/tree_age.R data/metadata/tree_age.txt $@
-
-# Site-specific
-TREE_AGE_SITE=data/processed/environ/tree_age_site.rds
-
-$(TREE_AGE_SITE) : code/tree_age_site.R\
-		data/metadata/tree_age.txt\
-		$$(TREE_AGE)
-	code/tree_age_site.R data/metadata/tree_age.txt $(TREE_AGE) $@
-
 #### Metabolites ####
 
 METAB=data/processed/environ/root_metabolites.txt
@@ -252,16 +235,36 @@ $(METAB) : code/format_metabolites.R\
 		data/environ/root_metabolites_raw.txt
 	code/format_metabolites.R data/environ/root_metabolites_raw.txt $@
 
+#### Tree age ####
+
+# Full dataset
+TREE_AGE=data/processed/environ/tree_age_full.rds
+
+$(TREE_AGE) : code/tree_age.R\
+		$$(METAB)\
+		data/metadata/tree_age.txt
+	code/tree_age.R $(METAB) data/metadata/tree_age.txt $@
+
+# Site-specific
+TREE_AGE_SITE=data/processed/environ/tree_age_site.rds
+
+$(TREE_AGE_SITE) : code/tree_age_site.R\
+		$$(METAB)\
+		data/metadata/tree_age.txt\
+		$$(TREE_AGE)
+	code/tree_age_site.R $(METAB) data/metadata/tree_age.txt $(TREE_AGE) $@
+
 #### Final phyloseq objects ####
 
 # 16S, phyloseq untrimmed
 PS_16S_UNTRIMMED=data/processed/16S/otu_processed/ps_untrimmed.rds
 
-$(PS_16S_UNTRIMMED) : code/make_16s_ps_untrimmed.R\
+$(PS_16S_UNTRIMMED) : code/make_ps_untrimmed.R\
 		$$(wildcard $$(OTU_97_16S)*.qza)\
 		$$(wildcard $$(TAX_16S)*.qza)\
-		$$(METADATA_16S)
-	code/make_16s_ps_untrimmed.R $(wildcard $(OTU_97_16S)*.qza) $(wildcard $(TAX_16S)*.qza) $(METADATA_16S) $@
+		$$(METADATA_16S)\
+		$$(METAB)
+	code/make_ps_untrimmed.R $(wildcard $(OTU_97_16S)*.qza) $(wildcard $(TAX_16S)*.qza) $(METADATA_16S) $(METAB) $@
 
 # 16S, phyloseq trimmed
 PS_16S_TRIMMED=data/processed/16S/otu_processed/ps_trimmed.rds
@@ -270,4 +273,108 @@ $(PS_16S_TRIMMED) : code/make_16s_ps_trimmed.R\
 		$$(PS_16S_UNTRIMMED)
 	code/make_16s_ps_trimmed.R $(PS_16S_UNTRIMMED) $@
 
-metadata : $(METADATA_16S) $(METADATA_ITS) $(TREE_AGE) $(TREE_AGE_SITE) $(METAB) $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED)
+# ITS, phyloseq untrimmed
+PS_ITS_UNTRIMMED=data/processed/ITS/otu_processed/ps_untrimmed.rds
+
+$(PS_ITS_UNTRIMMED) : code/make_ps_untrimmed.R\
+		$$(wildcard $$(OTU_97_ITS)*.qza)\
+		data/qiime2/final_qzas/ITS/otu_97_taxonomy/classification.qza\
+		$$(METADATA_ITS)\
+		$$(METAB)
+	code/make_ps_untrimmed.R $(wildcard $(OTU_97_ITS)*.qza) data/qiime2/final_qzas/ITS/otu_97_taxonomy/classification.qza $(METADATA_ITS) $(METAB) $@
+
+# ITS, phyloseq trimmed
+PS_ITS_TRIMMED=data/processed/ITS/otu_processed/ps_trimmed.rds
+
+$(PS_ITS_TRIMMED) : code/make_ITs_ps_trimmed.R\
+		$$(PS_ITS_UNTRIMMED)
+	code/make_its_ps_trimmed.R $(PS_ITS_UNTRIMMED) $@
+
+#### Final OTU tibbles ####
+
+# 16S, OTU
+FINAL_16S_OTU=data/processed/16S/otu_processed/otu_table.txt
+
+$(FINAL_16S_OTU) : code/get_otu_tibble.R\
+		$$(PS_16S_TRIMMED)
+	code/get_otu_tibble.R $(PS_16S_TRIMMED) $@
+
+# ITS, OTU
+FINAL_ITS_OTU=data/processed/ITS/otu_processed/otu_table.txt
+
+$(FINAL_ITS_OTU) : code/get_otu_tibble.R\
+		$$(PS_ITS_TRIMMED)
+	code/get_otu_tibble.R $(PS_ITS_TRIMMED) $@
+
+#### Final metadata tibbles ####
+
+# 16S, metadata
+FINAL_16S_META=data/processed/16S/otu_processed/metadata_table.txt
+
+$(FINAL_16S_META) : code/get_metadata_tibble.R\
+		$$(PS_16S_TRIMMED)
+	code/get_metadata_tibble.R $(PS_16S_TRIMMED) $@
+
+# ITS, metadata
+FINAL_ITS_META=data/processed/ITS/otu_processed/metadata_table.txt
+
+$(FINAL_ITS_META) : code/get_metadata_tibble.R\
+		$$(PS_ITS_TRIMMED)
+	code/get_metadata_tibble.R $(PS_ITS_TRIMMED) $@
+
+#### Final representative sequence fasta ####
+
+# 16S, representative sequences
+FINAL_16S_REPSEQS=data/processed/16S/otu_processed/representative_sequences.fasta
+
+$(FINAL_16S_REPSEQS) : code/get_repseqs_fasta.R\
+		$$(PS_16S_TRIMMED)
+	code/get_repseqs_fasta.R $(PS_16S_TRIMMED) $@
+
+# ITS, representative sequences
+FINAL_ITS_REPSEQS=data/processed/ITS/otu_processed/representative_sequences.fasta
+
+$(FINAL_ITS_REPSEQS) : code/get_repseqs_fasta.R\
+		$$(PS_ITS_TRIMMED)
+	code/get_repseqs_fasta.R $(PS_ITS_TRIMMED) $@
+
+#### Final taxonomy tibbles ####
+
+# 16S, taxonomy
+FINAL_16S_TAX=data/processed/16S/otu_processed/taxonomy_table.txt
+
+$(FINAL_16S_TAX) : code/get_taxonomy_tibble.R\
+		$$(PS_16S_TRIMMED)\
+	code/get_taxonomy_tibble.R $(PS_16S_TRIMMED) $@
+
+# ITS, taxonomy
+FINAL_ITS_TAX=data/processed/ITS/otu_processed/taxonomy_table.txt
+
+$(FINAL_ITS_TAX) : code/get_taxonomy_tibble.R\
+		$$(PS_ITS_TRIMMED)
+	code/get_taxonomy_tibble.R $(PS_ITS_TRIMMED) $@
+
+#### Final sequence summary tibbles ####
+
+# 16S sequence summary
+FINAL_16S_SUM=data/processed/16S/otu_processed/sequence_summary.txt
+
+$(FINAL_16S_SUM) : code/get_seq_summary_tibble.R\
+		$$(PS_16S_UNTRIMMED)\
+		$$(PS_16S_TRIMMED)
+	code/get_seq_summary_tibble.R $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $@
+
+# ITS sequence summary
+FINAL_ITS_SUM=data/processed/ITS/otu_processed/sequence_summary.txt
+
+$(FINAL_ITS_SUM) : code/get_seq_summary_tibble.R\
+		$$(PS_ITS_UNTRIMMED)\
+		$$(PS_ITS_TRIMMED)
+	code/get_seq_summary_tibble.R $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED) $@
+
+
+otu : $(METADATA_16S) $(METADATA_ITS) $(METAB) $(TREE_AGE)\
+$(TREE_AGE_SITE) $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED)\
+$(PS_ITS_TRIMMED) $(FINAL_16S_OTU) $(FINAL_ITS_OTU) $(FINAL_16S_META)\
+$(FINAL_ITS_META) $(FINAL_16S_REPSEQS) $(FINAL_ITS_REPSEQS) $(FINAL_16S_TAX)\
+$(FINAL_ITS_TAX) $(FINAL_16S_SUM) $(FINAL_ITS_SUM)

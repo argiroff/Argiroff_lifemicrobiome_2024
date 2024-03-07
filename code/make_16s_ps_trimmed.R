@@ -12,9 +12,7 @@ clargs <- commandArgs(trailingOnly = TRUE)
 library(tidyverse)
 library(phyloseq)
 
-ps_16s <- read_rds(
-  clargs[1]
-)
+ps_16s <- read_rds(clargs[1])
 
 # Remove sequences that are not bacteria or archaea and drop ASVs with no seqs
 ps_16s_trimmed <- subset_taxa(ps_16s, Kingdom == "d__Bacteria" | Kingdom == "d__Archaea")

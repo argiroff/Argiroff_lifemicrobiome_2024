@@ -10,8 +10,15 @@ clargs <- commandArgs(trailingOnly = TRUE)
 
 library(tidyverse)
 
+# Filter for non-poplar samples
+tree_id_filter <- read_tsv(clargs[1]) %>%
+  select(tree_id) %>%
+  distinct(.) %>%
+  pull(tree_id)
+
 # Read in
-tree_age_raw <- read_tsv(clargs[1]) %>%
+tree_age_raw <- read_tsv(clargs[2]) %>%
+  filter(tree_id %in% tree_id_filter) %>%
   group_by(site) %>%
   group_split(.) %>%
   map(., .f = ungroup) %>%
@@ -78,7 +85,7 @@ interp_age <- function(x, y) {
 }
 
 # Read in full data
-tree_age_full <- read_rds(file = "data/processed/envir/tree_age_full.rds")
+tree_age_full <- read_rds(file = clargs[3])
 
 # Interpolate ages and combine with full data
 tree_age_complete <- map2(
@@ -102,5 +109,5 @@ tree_age_out <- list(
 # Save
 write_rds(
   tree_age_out,
-  clargs[3]
+  clargs[4]
 )

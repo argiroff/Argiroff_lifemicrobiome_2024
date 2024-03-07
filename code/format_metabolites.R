@@ -33,7 +33,7 @@ metabolites <- read_tsv(clargs[1]) %>%
   pivot_longer(
     -c(metabolite, metabolite_id),
     names_to = "tree_id",
-    values_to = "relabund"
+    values_to = "concentration"
   ) %>%
   
   # Update tree ID
@@ -42,7 +42,7 @@ metabolites <- read_tsv(clargs[1]) %>%
   # Remove samples and unique metabolites that are not Populus
   filter(!(tree_id %in% drop_id)) %>%
   group_by(metabolite) %>%
-  mutate(metab_total = sum(relabund)) %>%
+  mutate(metab_total = sum(concentration)) %>%
   ungroup(.) %>%
   filter(metab_total > 0) %>%
   select(-metab_total)

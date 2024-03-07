@@ -9,8 +9,15 @@ clargs <- commandArgs(trailingOnly = TRUE)
 
 library(tidyverse)
 
+# Filter for non-poplar samples
+tree_id_filter <- read_tsv(clargs[1]) %>%
+  select(tree_id) %>%
+  distinct(.) %>%
+  pull(tree_id)
+
 # Read in
-tree_age_raw <- read_tsv(clargs[1])
+tree_age_raw <- read_tsv(clargs[2]) %>%
+  filter(tree_id %in% tree_id_filter)
 
 # Get data for age-DBH relationship
 tree_age_dbh <- tree_age_raw %>%
@@ -81,5 +88,5 @@ tree_age_out <- list(
 # Save
 write_rds(
   tree_age_out,
-  clargs[2]
+  clargs[3]
 )

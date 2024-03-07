@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript --vanilla
 
-# name : tree_age.R
+# name : make_16s_ps_untrimmed.R
 # author: William Argiroff
 # inputs : Sequence sample metadata files
 #   merged OTU qza, merged tax qza, merged repseq qza
@@ -16,54 +16,63 @@ library(qiime2R)
 library(phyloseq)
 
 # Make phyloseq object
-ps_16s <- qza_to_phyloseq(
+ps <- qza_to_phyloseq(
   features = clargs[2],
   taxonomy = clargs[3]
 )
 
 # Add representative sequences
-repseqs_16s_qza <- read_qza(
+repseqs_qza <- read_qza(
   file = clargs[1]
 )
 
-repseqs_16s <- repseqs_16s_qza$data
+repseqs <- repseqs_qza$data
 
-ps_16s <- merge_phyloseq(ps_16s, repseqs_16s)
+ps <- merge_phyloseq(ps, repseqs)
 
 # Add metadata
-metadata_16s <- read_tsv(
-  file = clargs[4]
-) %>%
+metadata <- read_tsv(file = clargs[4]) %>%
   
   # Match sample names
-  filter(sample_id %in% sample_names(ps_16s)) %>%
+  filter(sample_id %in% sample_names(ps)) %>%
   distinct(.) %>%
-  arrange(match(sample_id, sample_names(ps_16s))) %>%
+  arrange(match(sample_id, sample_names(ps))) %>%
   column_to_rownames(var = "sample_id") %>%
   as.data.frame(.)
 
-metadata_16s_input <- sample_data(metadata_16s)
+metadata_input <- sample_data(metadata)
 
-ps_16s <- merge_phyloseq(ps_16s, metadata_16s_input)
+ps <- merge_phyloseq(ps, metadata_input)
 
 # Filter
-ps_16s_trimmed <- subset_samples(
-  ps_16s,
+ps_trimmed <- subset_samples(
+  ps,
   plant_habitat != "SW"
 )
 
-ps_16s_trimmed <- subset_samples(
-  ps_16s_trimmed,
+ps_trimmed <- subset_samples(
+  ps_trimmed,
   sample_type != "Blank"
 )
 
-ps_16s_trimmed <- subset_samples(
-  ps_16s_trimmed,
+ps_trimmed <- subset_samples(
+  ps_trimmed,
   sample_type != "NTC"
+)
+
+# Drop non-poplar samples
+tree_id_filter <- read_tsv(clargs[5]) %>%
+  select(tree_id) %>%
+  distinct(.) %>%
+  pull(tree_id)
+
+ps_trimmed <- subset_samples(
+  ps_trimmed,
+  tree_id %in% tree_id_filter
 )
 
 # Save
 write_rds(
-  ps_16s_trimmed,
-  file = clargs[5]
+  ps_trimmed,
+  file = clargs[6]
 )
