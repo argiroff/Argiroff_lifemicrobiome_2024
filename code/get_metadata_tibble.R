@@ -19,7 +19,8 @@ ps <- read_rds(clargs[1])
 # Metadata
 metadata <- sample_data(ps) %>%
   as.data.frame(.) %>%
-  as_tibble(.) %>%
+  as_tibble(rownames = NA) %>%
+  rownames_to_column(var = "sample_id") %>%
   distinct(.)
 
 # Save

@@ -344,7 +344,7 @@ $(FINAL_ITS_REPSEQS) : code/get_repseqs_fasta.R\
 FINAL_16S_TAX=data/processed/16S/otu_processed/taxonomy_table.txt
 
 $(FINAL_16S_TAX) : code/get_taxonomy_tibble.R\
-		$$(PS_16S_TRIMMED)\
+		$$(PS_16S_TRIMMED)
 	code/get_taxonomy_tibble.R $(PS_16S_TRIMMED) $@
 
 # ITS, taxonomy
@@ -372,9 +372,177 @@ $(FINAL_ITS_SUM) : code/get_seq_summary_tibble.R\
 		$$(PS_ITS_TRIMMED)
 	code/get_seq_summary_tibble.R $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED) $@
 
+otu : $(METADATA_16S) $(METADATA_ITS)\
+$(METAB) $(TREE_AGE) $(TREE_AGE_SITE)\
+$(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED)\
+$(FINAL_16S_OTU) $(FINAL_ITS_OTU) $(FINAL_16S_META) $(FINAL_ITS_META)\
+$(FINAL_16S_REPSEQS) $(FINAL_ITS_REPSEQS) $(FINAL_16S_TAX) $(FINAL_ITS_TAX)\
+$(FINAL_16S_SUM) $(FINAL_ITS_SUM)
 
-otu : $(METADATA_16S) $(METADATA_ITS) $(METAB) $(TREE_AGE)\
-$(TREE_AGE_SITE) $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED)\
-$(PS_ITS_TRIMMED) $(FINAL_16S_OTU) $(FINAL_ITS_OTU) $(FINAL_16S_META)\
-$(FINAL_ITS_META) $(FINAL_16S_REPSEQS) $(FINAL_ITS_REPSEQS) $(FINAL_16S_TAX)\
-$(FINAL_ITS_TAX) $(FINAL_16S_SUM) $(FINAL_ITS_SUM)
+#### Split OTU tables by habitat ####
+
+# 16S OTU tables
+OTU_HAB_16S=data/processed/16S/otu_processed/BS_otu.txt data/processed/16S/otu_processed/RE_otu.txt data/processed/16S/otu_processed/RH_otu.txt
+
+$(OTU_HAB_16S) : code/split_otu.R\
+		$$(FINAL_16S_META)\
+		$$(FINAL_16S_OTU)
+	code/split_otu.R $(FINAL_16S_META) $(FINAL_16S_OTU) $@
+
+# ITS OTU tables
+OTU_HAB_ITS=data/processed/ITS/otu_processed/BS_otu.txt data/processed/ITS/otu_processed/RE_otu.txt data/processed/ITS/otu_processed/RH_otu.txt
+
+$(OTU_HAB_ITS) : code/split_otu.R\
+		$$(FINAL_ITS_META)\
+		$$(FINAL_ITS_OTU)
+	code/split_otu.R $(FINAL_ITS_META) $(FINAL_ITS_OTU) $@
+
+#### Split metadata tables by habitat ####
+
+# 16S metadata
+MET_HAB_16S=$(subst _otu.txt,_metadata.txt,$(OTU_HAB_16S))
+
+$(MET_HAB_16S) : code/split_metadata.R\
+		$$(FINAL_16S_META)\
+		$$(subst _metadata.txt,_otu.txt,$$@)
+	code/split_metadata.R $(FINAL_16S_META) $(subst _metadata.txt,_otu.txt,$@) $@
+
+# ITS metadata
+MET_HAB_ITS=$(subst _otu.txt,_metadata.txt,$(OTU_HAB_ITS))
+
+$(MET_HAB_ITS) : code/split_metadata.R\
+		$$(FINAL_ITS_META)\
+		$$(subst _metadata.txt,_otu.txt,$$@)
+	code/split_metadata.R $(FINAL_ITS_META) $(subst _metadata.txt,_otu.txt,$@) $@
+
+#### Split representative sequences fasta by habitat ####
+
+# 16S representative sequences
+REPSEQ_HAB_16S=$(subst _otu.txt,_representative_sequences.fasta,$(OTU_HAB_16S))
+
+$(REPSEQ_HAB_16S) : code/split_repseqs.R\
+		$$(FINAL_16S_REPSEQS)\
+		$$(subst _representative_sequences.fasta,_otu.txt,$$@)
+	code/split_repseqs.R $(FINAL_16S_REPSEQS) $(subst _representative_sequences.fasta,_otu.txt,$@) $@
+
+# ITS representative sequences
+REPSEQ_HAB_ITS=$(subst _otu.txt,_representative_sequences.fasta,$(OTU_HAB_ITS))
+
+$(REPSEQ_HAB_ITS) : code/split_repseqs.R\
+		$$(FINAL_ITS_REPSEQS)\
+		$$(subst _representative_sequences.fasta,_otu.txt,$$@)
+	code/split_repseqs.R $(FINAL_ITS_REPSEQS) $(subst _representative_sequences.fasta,_otu.txt,$@) $@
+
+#### Split taxonomy tables by habitat ####
+
+# 16S taxonomy
+TAX_HAB_16S=$(subst _otu.txt,_taxonomy_table.txt,$(OTU_HAB_16S))
+
+$(TAX_HAB_16S) : code/split_taxonomy.R\
+		$$(FINAL_16S_TAX)\
+		$$(subst _taxonomy_table.txt,_otu.txt,$$@)
+	code/split_taxonomy.R $(FINAL_16S_TAX) $(subst _taxonomy_table.txt,_otu.txt,$@) $@
+
+# ITS taxonomy
+TAX_HAB_ITS=$(subst _otu.txt,_taxonomy_table.txt,$(OTU_HAB_ITS))
+
+$(TAX_HAB_ITS) : code/split_taxonomy.R\
+		$$(FINAL_ITS_TAX)\
+		$$(subst _taxonomy_table.txt,_otu.txt,$$@)
+	code/split_taxonomy.R $(FINAL_ITS_TAX) $(subst _taxonomy_table.txt,_otu.txt,$@) $@
+
+#### Rarefaction curves ####
+
+# Generate 16S rarefaction curves
+RARECURVE_16S=$(subst _otu.txt,_rarefaction_curves.txt,$(OTU_HAB_16S))
+
+$(RARECURVE_16S) : code/get_rarefaction_curves.R\
+		$$(subst _rarefaction_curves.txt,_otu.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_otu.txt,$@) $@
+
+# Generate ITS rarefaction curves
+RARECURVE_ITS=$(subst _otu.txt,_rarefaction_curves.txt,$(OTU_HAB_ITS))
+
+$(RARECURVE_ITS) : code/get_rarefaction_curves.R\
+		$$(subst _rarefaction_curves.txt,_otu.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_otu.txt,$@) $@
+
+# Make rarefaction curve figures
+RARECURVE_FIG=results/rarefaction_curves_fig.rds
+
+$(RARECURVE_FIG) : code/make_rarefaction_curve_plots.R\
+		$$(MET_HAB_16S)\
+		$$(MET_HAB_ITS)\
+		$$(RARECURVE_16S)\
+		$$(RARECURVE_ITS)
+	code/make_rarefaction_curve_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS) $@
+
+# Save pdf of rarefaction curve figures
+results/rarefaction_curves_fig.pdf : code/save_figure.R\
+		$$(subst .pdf,.rds,$$@)
+	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
+
+#### Total sequence counts by sample ####
+
+# Get sequence totals
+SAMPLE_SEQ_TOTAL=$(subst _otu.txt,_sample_total.txt,$(OTU_HAB_16S))\
+$(subst _otu.txt,_sample_total.txt,$(OTU_HAB_ITS))
+
+$(SAMPLE_SEQ_TOTAL) : code/get_sample_sequence_totals.R\
+		$$(subst _sample_total.txt,_otu.txt,$$@)
+	code/get_sample_sequence_totals.R $(subst _sample_total.txt,_otu.txt,$@) $@
+
+# Make sequence total figures
+SAMPLE_SEQ_TOTAL_FIG=results/sample_sequence_totals_fig.rds
+
+$(SAMPLE_SEQ_TOTAL_FIG) : code/make_sample_sequence_total_plots.R\
+		$$(MET_HAB_16S)\
+		$$(MET_HAB_ITS)\
+		$$(SAMPLE_SEQ_TOTAL)
+	code/make_sample_sequence_total_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(SAMPLE_SEQ_TOTAL) $@
+
+# Save pdf of sequence total figures
+results/sample_sequence_totals_fig.pdf : code/save_figure.R\
+		$$(subst .pdf,.rds,$$@)
+	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
+
+#### Subsample tables ####
+
+# Subsample with ranked scaling (SRS)
+OTU_SUB=$(subst _otu.txt,_sub_otu.txt,$(OTU_HAB_16S))\
+$(subst _otu.txt,_sub_otu.txt,$(OTU_HAB_ITS))
+
+$(OTU_SUB) : code/get_sub_otu.R\
+		$$(subst _sub_otu.txt,_otu.txt,$$@)
+	code/get_sub_otu.R $(subst _sub_otu.txt,_otu.txt,$@) $@
+
+# Metadata
+METADATA_SUB=$(subst _sub_otu.txt,_sub_metadata.txt,$(OTU_SUB))
+
+$(METADATA_SUB) : code/get_sub_metadata.R\
+		$$(subst _sub_metadata.txt,_sub_otu.txt,$$@)\
+		$$(subst _sub_metadata.txt,_metadata.txt,$$@)
+	code/get_sub_metadata.R $(subst _sub_metadata.txt,_sub_otu.txt,$@) $(subst _sub_metadata.txt,_metadata.txt,$@) $@
+
+# Representative sequences
+REPSEQ_SUB=$(subst _sub_otu.txt,_sub_representative_sequences.fasta,$(OTU_SUB))
+
+$(REPSEQ_SUB) : code/get_sub_repseqs.R\
+		$$(subst _sub_representative_sequences.fasta,_sub_otu.txt,$$@)\
+		$$(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$$@)
+	code/get_sub_repseqs.R $(subst _sub_representative_sequences.fasta,_sub_otu.txt,$@) $(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$@) $@
+
+# Metadata
+TAX_SUB=$(subst _sub_otu.txt,_sub_taxonomy_table.txt,$(OTU_SUB))
+
+$(TAX_SUB) : code/get_sub_taxonomy.R\
+		$$(subst _sub_taxonomy_table.txt,_sub_otu.txt,$$@)\
+		$$(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$$@)
+	code/get_sub_taxonomy.R $(subst _sub_taxonomy_table.txt,_sub_otu.txt,$@) $(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$@) $@
+
+subsample : $(OTU_HAB_16S) $(OTU_HAB_ITS)\
+$(MET_HAB_16S) $(MET_HAB_ITS) $(REPSEQ_HAB_16S) $(REPSEQ_HAB_ITS)\
+$(TAX_HAB_16S) $(TAX_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS)\
+$(RARECURVE_FIG) results/rarefaction_curves_fig.pdf\
+$(SAMPLE_SEQ_TOTAL) $(SAMPLE_SEQ_TOTAL_FIG) results/sample_sequence_totals_fig.pdf\
+$(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
