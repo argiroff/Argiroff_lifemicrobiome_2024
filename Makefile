@@ -159,55 +159,79 @@ $(MERGE_SEQS_ITS) : code/merge_repseqs.sh\
 		$$(SEQS_ITS)
 	code/merge_repseqs.sh $(SEQS_ITS)
 
-#### Cluster 97% OTUs, table ####
+# #### Cluster 97% OTUs, table ####
 
-# 16S
-OTU_97_16S=data/qiime2/final_qzas/16S/otu_97/
+# # 16S
+# OTU_97_16S=data/qiime2/final_qzas/16S/otu_97/
 
-$(OTU_97_16S) : code/cluster_otu_97.sh\
-		data/qiime2/final_qzas/16S/merged_table.qza\
-		data/qiime2/final_qzas/16S/merged_representative_sequences.qza
-	code/cluster_otu_97.sh data/qiime2/final_qzas/16S/merged_table.qza data/qiime2/final_qzas/16S/merged_representative_sequences.qza
+# $(OTU_97_16S) : code/cluster_otu_97.sh\
+# 		data/qiime2/final_qzas/16S/merged_table.qza\
+# 		data/qiime2/final_qzas/16S/merged_representative_sequences.qza
+# 	code/cluster_otu_97.sh data/qiime2/final_qzas/16S/merged_table.qza data/qiime2/final_qzas/16S/merged_representative_sequences.qza
 
-#ITS
-OTU_97_ITS=data/qiime2/final_qzas/ITS/otu_97/
+# #ITS
+# OTU_97_ITS=data/qiime2/final_qzas/ITS/otu_97/
 
-$(OTU_97_ITS) : code/cluster_otu_97.sh\
-		data/qiime2/final_qzas/ITS/merged_table.qza\
-		data/qiime2/final_qzas/ITS/merged_representative_sequences.qza
-	code/cluster_otu_97.sh data/qiime2/final_qzas/ITS/merged_table.qza data/qiime2/final_qzas/ITS/merged_representative_sequences.qza
+# $(OTU_97_ITS) : code/cluster_otu_97.sh\
+# 		data/qiime2/final_qzas/ITS/merged_table.qza\
+# 		data/qiime2/final_qzas/ITS/merged_representative_sequences.qza
+# 	code/cluster_otu_97.sh data/qiime2/final_qzas/ITS/merged_table.qza data/qiime2/final_qzas/ITS/merged_representative_sequences.qza
 
 #### Assign taxonomy ####
 
-# 16S
-TAX_16S=data/qiime2/final_qzas/16S/otu_97_taxonomy/
+# # 16S
+# TAX_16S=data/qiime2/final_qzas/16S/otu_97_taxonomy/
 
-$(TAX_16S) : code/assign_tax_16s.sh\
-		data/qiime2/final_qzas/16S/otu_97/clustered_sequences.qza\
+# $(TAX_16S) : code/assign_tax_16s.sh\
+# 		data/qiime2/final_qzas/16S/otu_97/clustered_sequences.qza\
+# 		data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
+# 	code/assign_tax_16s.sh data/qiime2/final_qzas/16S/otu_97/clustered_sequences.qza data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
+
+# # ITS
+# TAX_ITS=data/qiime2/final_qzas/ITS/otu_97_taxonomy/
+
+# $(TAX_ITS) : code/assign_tax_its.sh\
+# 		data/qiime2/final_qzas/ITS/otu_97/clustered_sequences.qza\
+# 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza\
+# 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
+# 	code/assign_tax_its.sh data/qiime2/final_qzas/ITS/otu_97/clustered_sequences.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
+
+# 16S
+TAX_16S=data/qiime2/final_qzas/16S/asv_taxonomy/
+
+$(TAX_16S) : code/assign_tax_16s_asv.sh\
+		data/qiime2/final_qzas/16S/merged_representative_sequences.qza\
 		data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
-	code/assign_tax_16s.sh data/qiime2/final_qzas/16S/otu_97/clustered_sequences.qza data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
+	code/assign_tax_16s.sh data/qiime2/final_qzas/16S/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
 
 # ITS
-TAX_ITS=data/qiime2/final_qzas/ITS/otu_97_taxonomy/
+TAX_ITS=data/qiime2/final_qzas/ITS/asv_taxonomy/
 
-$(TAX_ITS) : code/assign_tax_its.sh\
-		data/qiime2/final_qzas/ITS/otu_97/clustered_sequences.qza\
+$(TAX_ITS) : code/assign_tax_its_asv.sh\
+		data/qiime2/final_qzas/ITS/merged_representative_sequences.qza\
 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza\
 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
-	code/assign_tax_its.sh data/qiime2/final_qzas/ITS/otu_97/clustered_sequences.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
+	code/assign_tax_its.sh data/qiime2/final_qzas/ITS/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
 
 #### Full QIIME2 rules ####
 
 # 16S
+# qiime2_16s : $(MANIFEST_16S_OUT) $(IMPORT_16S_OUT) $(SUM_16S_OUT)\
+# 	$(TRIM_16S_OUT) $(SUM_16S_TRIM) $(DADA2_16S) $(SUM_16S_DADA2)\
+# 	$(MERGE_TAB_16S) $(MERGE_SEQS_16S) $(OTU_97_16S) $(TAX_16S)
 
 qiime2_16s : $(MANIFEST_16S_OUT) $(IMPORT_16S_OUT) $(SUM_16S_OUT)\
 	$(TRIM_16S_OUT) $(SUM_16S_TRIM) $(DADA2_16S) $(SUM_16S_DADA2)\
-	$(MERGE_TAB_16S) $(MERGE_SEQS_16S) $(OTU_97_16S) $(TAX_16S)
+	$(MERGE_TAB_16S) $(MERGE_SEQS_16S) $(TAX_16S)
 
 # ITS
+# qiime2_its : $(MANIFEST_ITS_OUT) $(IMPORT_ITS_OUT) $(SUM_ITS_OUT)\
+# 	$(TRIM_ITS_OUT) $(SUM_ITS_TRIM) $(DADA2_ITS) $(SUM_ITS_DADA2)\
+# 	$(MERGE_TAB_ITS) $(MERGE_SEQS_ITS) $(OTU_97_ITS) $(TAX_ITS)
+
 qiime2_its : $(MANIFEST_ITS_OUT) $(IMPORT_ITS_OUT) $(SUM_ITS_OUT)\
 	$(TRIM_ITS_OUT) $(SUM_ITS_TRIM) $(DADA2_ITS) $(SUM_ITS_DADA2)\
-	$(MERGE_TAB_ITS) $(MERGE_SEQS_ITS) $(OTU_97_ITS) $(TAX_ITS)
+	$(MERGE_TAB_ITS) $(MERGE_SEQS_ITS) $(TAX_ITS)
 
 #### Format sequence metadata ####
 
