@@ -97,7 +97,10 @@ tree_age_complete <- map2(
   # Combine into single data frame and add full data
   bind_rows(.) %>%
   full_join(tree_age_full$age_df, ., by = "tree_id") %>%
-  mutate(tree_age_site = ifelse(is.na(tree_age_site), tree_age, tree_age_site))
+  mutate(
+    tree_age_site = ifelse(is.na(tree_age_site), tree_age, tree_age_site),
+    tree_age_site = ifelse(tree_age_site < 1, 1, tree_age_site)
+  )
 
 # Create output list
 tree_age_out <- list(

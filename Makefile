@@ -202,7 +202,7 @@ TAX_16S=data/qiime2/final_qzas/16S/asv_taxonomy/
 $(TAX_16S) : code/assign_tax_16s_asv.sh\
 		data/qiime2/final_qzas/16S/merged_representative_sequences.qza\
 		data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
-	code/assign_tax_16s.sh data/qiime2/final_qzas/16S/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
+	code/assign_tax_16s_asv.sh data/qiime2/final_qzas/16S/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/16S/silva-138-99-515-806-nb-classifier.qza
 
 # ITS
 TAX_ITS=data/qiime2/final_qzas/ITS/asv_taxonomy/
@@ -211,7 +211,7 @@ $(TAX_ITS) : code/assign_tax_its_asv.sh\
 		data/qiime2/final_qzas/ITS/merged_representative_sequences.qza\
 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza\
 		data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
-	code/assign_tax_its.sh data/qiime2/final_qzas/ITS/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
+	code/assign_tax_its_asv.sh data/qiime2/final_qzas/ITS/merged_representative_sequences.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_seqs_dynamic_29112022.qza data/qiime2/final_qzas/taxonomy/ITS/unite_train/unite_QZAs/unite_ver9_taxonomy_dynamic_29112022.qza
 
 #### Full QIIME2 rules ####
 
@@ -281,54 +281,56 @@ $(TREE_AGE_SITE) : code/tree_age_site.R\
 #### Final phyloseq objects ####
 
 # 16S, phyloseq untrimmed
-PS_16S_UNTRIMMED=data/processed/16S/otu_processed/ps_untrimmed.rds
+PS_16S_UNTRIMMED=data/processed/16S/asv_processed/ps_untrimmed.rds
 
 $(PS_16S_UNTRIMMED) : code/make_ps_untrimmed.R\
-		$$(wildcard $$(OTU_97_16S)*.qza)\
+		$$(wildcard data/qiime2/final_qzas/16S/*.qza)\
 		$$(wildcard $$(TAX_16S)*.qza)\
 		$$(METADATA_16S)\
 		$$(METAB)
-	code/make_ps_untrimmed.R $(wildcard $(OTU_97_16S)*.qza) $(wildcard $(TAX_16S)*.qza) $(METADATA_16S) $(METAB) $@
+	code/make_ps_untrimmed.R $(wildcard data/qiime2/final_qzas/16S/*.qza) $(wildcard $(TAX_16S)*.qza) $(METADATA_16S) $(METAB) $@
 
 # 16S, phyloseq trimmed
-PS_16S_TRIMMED=data/processed/16S/otu_processed/ps_trimmed.rds
+PS_16S_TRIMMED=data/processed/16S/asv_processed/ps_trimmed.rds
 
 $(PS_16S_TRIMMED) : code/make_16s_ps_trimmed.R\
 		$$(PS_16S_UNTRIMMED)
 	code/make_16s_ps_trimmed.R $(PS_16S_UNTRIMMED) $@
 
 # ITS, phyloseq untrimmed
-PS_ITS_UNTRIMMED=data/processed/ITS/otu_processed/ps_untrimmed.rds
+PS_ITS_UNTRIMMED=data/processed/ITS/asv_processed/ps_untrimmed.rds
 
 $(PS_ITS_UNTRIMMED) : code/make_ps_untrimmed.R\
-		$$(wildcard $$(OTU_97_ITS)*.qza)\
-		data/qiime2/final_qzas/ITS/otu_97_taxonomy/classification.qza\
+		$$(wildcard data/qiime2/final_qzas/ITS/*.qza)\
+		data/qiime2/final_qzas/ITS/asv_taxonomy/classification.qza\
 		$$(METADATA_ITS)\
 		$$(METAB)
-	code/make_ps_untrimmed.R $(wildcard $(OTU_97_ITS)*.qza) data/qiime2/final_qzas/ITS/otu_97_taxonomy/classification.qza $(METADATA_ITS) $(METAB) $@
+	code/make_ps_untrimmed.R data/qiime2/final_qzas/ITS/*.qza data/qiime2/final_qzas/ITS/asv_taxonomy/classification.qza $(METADATA_ITS) $(METAB) $@
 
 # ITS, phyloseq trimmed
-PS_ITS_TRIMMED=data/processed/ITS/otu_processed/ps_trimmed.rds
+PS_ITS_TRIMMED=data/processed/ITS/asv_processed/ps_trimmed.rds
 
 $(PS_ITS_TRIMMED) : code/make_its_ps_trimmed.R\
 		$$(PS_ITS_UNTRIMMED)
 	code/make_its_ps_trimmed.R $(PS_ITS_UNTRIMMED) $@
 
-#### Final OTU tibbles ####
+#### Final ASV tibbles ####
 
-# 16S, OTU
-FINAL_16S_OTU=data/processed/16S/otu_processed/otu_table.txt
+# 16S, ASV
+FINAL_16S_ASV=data/processed/16S/asv_processed/asv_table.txt
 
-$(FINAL_16S_OTU) : code/get_otu_tibble.R\
+$(FINAL_16S_ASV) : code/get_asv_tibble.R\
 		$$(PS_16S_TRIMMED)
-	code/get_otu_tibble.R $(PS_16S_TRIMMED) $@
+	code/get_asv_tibble.R $(PS_16S_TRIMMED) $@
 
-# ITS, OTU
-FINAL_ITS_OTU=data/processed/ITS/otu_processed/otu_table.txt
+# ITS, ASV
+FINAL_ITS_ASV=data/processed/ITS/asv_processed/asv_table.txt
 
-$(FINAL_ITS_OTU) : code/get_otu_tibble.R\
+$(FINAL_ITS_ASV) : code/get_asv_tibble.R\
 		$$(PS_ITS_TRIMMED)
-	code/get_otu_tibble.R $(PS_ITS_TRIMMED) $@
+	code/get_asv_tibble.R $(PS_ITS_TRIMMED) $@
+
+ps : $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED)
 
 #### Final metadata tibbles ####
 
@@ -573,6 +575,21 @@ $(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
+
+#### 16S and ITS dbRDA ####
+
+# Run dbRDA
+DBRDA=$(subst _sub_otu.txt,_dbrda.rds,$(subst /otu_processed/,/dbrda/,$(OTU_SUB)))
+
+$(DBRDA) : code/run_dbrda.R\
+		$$(subst _dbrda.rds,_sub_otu.txt,$$(subst /dbrda/,/otu_processed/,$$@))\
+		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/otu_processed/,$$@))
+		$$(TREE_AGE_SITE)
+	code/run_dbrda.R $(subst _dbrda.rds,_sub_otu.txt,$(subst /dbrda/,/otu_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/otu_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# Run dbRDA ANOVA
+
+dbrda : $(DBRDA)
 
 #### 16S and ITS TITAN2 ####
 

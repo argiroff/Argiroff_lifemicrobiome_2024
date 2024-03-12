@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript --vanilla
 
-# name : get_otu_tibble.R
+# name : get_asv_tibble.R
 # author: William Argiroff
 # inputs : Trimmed phyloseq object
-# output : OTU table as a 3 column tibble
+# output : ASV table as a 3 column tibble
 # notes : expects order of inputs, output
-#   expects input paths for otu_processed/ps_trimmed.rds
-#   and output data/processed/<16S or ITS>/otu_processed/otu_tibble.txt
+#   expects input paths for asv_processed/ps_trimmed.rds
+#   and output data/processed/<16S or ITS>/asv_processed/asv_tibble.txt
 
 clargs <- commandArgs(trailingOnly = TRUE)
 
@@ -15,25 +15,25 @@ library(phyloseq)
 
 ps <- read_rds(clargs[1])
 
-# OTU table, long format
-otu <- otu_table(ps) %>%
+# ASV table, long format
+asv <- otu_table(ps) %>%
   
   as.data.frame(.) %>%
 
   as_tibble(rownames = NA) %>%
   
-  rownames_to_column(var = "otu_id") %>%
+  rownames_to_column(var = "asv_id") %>%
   
   pivot_longer(
-    -otu_id,
+    -asv_id,
     names_to = "sample_id",
     values_to = "n_seqs"
   ) %>%
   
-  select(sample_id, otu_id, n_seqs)
+  select(sample_id, asv_id, n_seqs)
 
 # Save
 write_tsv(
-  otu,
+  asv,
   file = clargs[2]
 )

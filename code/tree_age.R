@@ -52,7 +52,8 @@ tree_age_full <- tree_age_raw %>%
       levels = c("Observed", "Interpolated")
     ),
     
-    tree_age_full = ifelse(is.na(tree_age_full), tree_age, tree_age_full)
+    tree_age_full = ifelse(is.na(tree_age_full), tree_age, tree_age_full),
+    tree_age_full = ifelse(tree_age_full < 1, 1, tree_age_full)
     
   ) %>%
   
