@@ -549,6 +549,25 @@ $(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
+#### 16S and ITS dbRDA ####
+
+# Run dbRDA
+DBRDA=$(subst _sub_otu.txt,_dbrda.rds,$(subst /otu_processed/,/dbrda/,$(OTU_SUB)))
+
+$(DBRDA) : code/run_dbrda.R\
+		$$(subst _dbrda.rds,_sub_otu.txt,$$(subst /dbrda/,/otu_processed/,$$@))\
+		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/otu_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/run_dbrda.R $(subst _dbrda.rds,_sub_otu.txt,$(subst /dbrda/,/otu_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/otu_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# Run dbRDA ANOVA
+DBRDA_ANOVA=$(subst _dbrda.rds,_dbrda_anova.txt,$(DBRDA))
+
+$(DBRDA_ANOVA) : code/run_dbrda_anova.R\
+		$$(subst _dbrda_anova.txt,_dbrda.rds,$$@)
+	code/run_dbrda_anova.R $(subst _dbrda_anova.txt,_dbrda.rds,$@) $@
+
+dbrda : $(DBRDA) $(DBRDA_ANOVA)
 
 #### 16S and ITS TITAN2 ####
 
