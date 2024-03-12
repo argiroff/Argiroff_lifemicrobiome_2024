@@ -549,7 +549,6 @@ $(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
-#### 16S and ITS dbRDA ####
 
 #### 16S and ITS TITAN2 ####
 
