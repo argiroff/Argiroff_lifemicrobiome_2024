@@ -72,6 +72,7 @@ tree_age_full <- tree_age_raw %>%
   select(
     tree_id,
     tree_age,
+    dbh,
     tree_age_full,
     value_type,
     min_dbh,

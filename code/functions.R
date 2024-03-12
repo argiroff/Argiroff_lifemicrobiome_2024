@@ -81,3 +81,103 @@ format_axis <- function(x) {
   return(tmp1)
   
 }
+
+#### Trim OTUs based on presence/absence ####
+
+trim_otu_pa <- function(x, otu.pa) {
+  
+  # OTU ID filter
+  tmp1 <- x %>%
+    mutate(otu_pa = ifelse(n_seqs > 0, 1, 0)) %>%
+    group_by(otu_id) %>%
+    summarise(otu_total_pa = sum(otu_pa)) %>%
+    ungroup() %>%
+    filter(otu_total_pa >= otu.pa) %>%
+    pull(otu_id)
+  
+  # Trim
+  tmp2 <- x %>%
+    filter(otu_id %in% tmp1)
+  
+  return(tmp2)
+  
+}
+
+#### Function to get list names for TITAN outputs ####
+
+get_TITAN_list_names <- function(x) {
+  
+  tmp1 <- x %>%
+    str_remove(., "data/processed/") %>%
+    str_remove(., "_titan_output.rds") %>%
+    str_replace(., "/titan/", "_")
+  
+  return(tmp1)
+}
+
+#### Function to format TITAN outputs
+
+format_TITAN_outputs <- function(x) {
+  
+  # Format table
+  tmp1 <- x %>%
+    separate(
+      col = ID,
+      into = c("community", "plant_habitat"),
+      sep = "_"
+    ) %>%
+    
+    mutate(
+      
+      community = ifelse(community == "16S", "Bacteria and Archaea", community),
+      community = ifelse(community == "ITS", "Fungi", community),
+      
+      plant_habitat = ifelse(plant_habitat == "BS", "Soil", plant_habitat),
+      plant_habitat = ifelse(plant_habitat == "RH", "Rhizosphere", plant_habitat),
+      plant_habitat = ifelse(plant_habitat == "RE", "Root endosphere", plant_habitat)
+      
+    )
+  
+  return(tmp1)
+  
+}
+
+#### Standard error ####
+
+se <- function(x) {
+  
+  tmp1 <- sd(x) / sqrt(length(x))
+  
+  return(tmp1)
+  
+}
+
+#### Drop metabolites with concentration of 0 ####
+
+drop_0conc_metab <- function(x) {
+  
+  tmp1 <- x %>%
+    group_by(metabolite_id) %>%
+    mutate(metab_concentration = sum(concentration)) %>%
+    ungroup(.) %>%
+    filter(metab_concentration > 0) %>%
+    select(-metab_concentration)
+  
+  return(tmp1)
+  
+}
+
+#### Drop samples with no metabolite concentrations ####
+
+drop_0conc_trees <- function(x) {
+  
+  tmp1 <- x %>%
+    group_by(tree_id) %>%
+    mutate(tree_concentration = sum(concentration)) %>%
+    ungroup(.) %>%
+    filter(tree_concentration > 0) %>%
+    select(-tree_concentration)
+  
+  return(tmp1)
+  
+}

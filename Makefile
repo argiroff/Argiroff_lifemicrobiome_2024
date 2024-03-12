@@ -286,7 +286,7 @@ $(PS_ITS_UNTRIMMED) : code/make_ps_untrimmed.R\
 # ITS, phyloseq trimmed
 PS_ITS_TRIMMED=data/processed/ITS/otu_processed/ps_trimmed.rds
 
-$(PS_ITS_TRIMMED) : code/make_ITs_ps_trimmed.R\
+$(PS_ITS_TRIMMED) : code/make_its_ps_trimmed.R\
 		$$(PS_ITS_UNTRIMMED)
 	code/make_its_ps_trimmed.R $(PS_ITS_UNTRIMMED) $@
 
@@ -546,3 +546,76 @@ $(TAX_HAB_16S) $(TAX_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS)\
 $(RARECURVE_FIG) results/rarefaction_curves_fig.pdf\
 $(SAMPLE_SEQ_TOTAL) $(SAMPLE_SEQ_TOTAL_FIG) results/sample_sequence_totals_fig.pdf\
 $(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
+
+#### Alpha diversity ####
+
+
+#### 16S and ITS TITAN2 ####
+
+# Prepare 16S and ITS TITAN2 input data
+TITAN_IN=$(subst _sub_otu.txt,_titan_input.rds,$(subst /otu_processed/,/titan/,$(OTU_SUB)))
+
+$(TITAN_IN) : code/get_titan_input.R\
+		$$(subst _titan_input.rds,_sub_otu.txt,$$(subst /titan/,/otu_processed/,$$@))\
+		$$(subst _titan_input.rds,_sub_metadata.txt,$$(subst /titan/,/otu_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/get_titan_input.R $(subst _titan_input.rds,_sub_otu.txt,$(subst /titan/,/otu_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/otu_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# Run 16S and ITS TITAN2
+TITAN_OUT=$(subst _titan_input.rds,_titan_output.rds,$(TITAN_IN))
+
+$(TITAN_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$@)
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$@) $@
+
+# 16S and ITS TITAN2 fzumz
+data/processed/titan/titan_fsumz.txt : code/get_titan_fsumz.R\
+		$$(TITAN_OUT)
+	code/get_titan_fsumz.R $(TITAN_OUT) $@
+
+# 16S and ITS TITAN2 OTUs
+data/processed/titan/titan_otu.txt : code/get_titan_otu.R\
+		$$(TITAN_OUT)\
+		$$(TAX_SUB)
+	code/get_titan_otu.R $(TITAN_OUT) $(TAX_SUB) $@
+
+# TITAN2 Bartlett test
+results/titan_bartlett.txt : code/run_titan_bartlett.R\
+		data/processed/titan/titan_fsumz.txt
+	code/run_titan_bartlett.R data/processed/titan/titan_fsumz.txt $@
+
+# TITAN2 paired t-test
+results/titan_paired_ttest.txt : code/run_titan_paired_ttest.R\
+		data/processed/titan/titan_fsumz.txt
+	code/run_titan_paired_ttest.R data/processed/titan/titan_fsumz.txt $@
+
+# Make fsumz figure
+results/titan_fsumz_fig.rds : code/make_titan_fsumz_fig.R\
+		data/processed/titan/titan_fsumz.txt\
+		results/titan_paired_ttest.txt
+	code/make_titan_fsumz_fig.R data/processed/titan/titan_fsumz.txt results/titan_paired_ttest.txt $@
+
+# Save fsumz figure as a pdf
+results/titan_fsumz_fig.pdf : code/save_figure.R\
+		results/titan_fsumz_fig.rds
+	code/save_figure.R results/titan_fsumz_fig.rds "pdf" "NULL" "6.5" "5" "in" $@
+
+#### Metabolite TITAN2 ####
+
+# Metabolite TITAN input data
+data/processed/titan/metabolite_titan_input.rds : code/get_metabolite_titan_input.R\
+		$$(METAB)\
+		$$(FINAL_16S_META)\
+		$$(FINAL_ITS_META)\
+		$$(TREE_AGE_SITE)
+	code/get_metabolite_titan_input.R $(METAB) $(FINAL_16S_META) $(FINAL_ITS_META) $(TREE_AGE_SITE) $@
+
+# Metabolite TITAN
+data/processed/titan/metabolite_titan_output.rds : code/run_titan_metabolites.R\
+		data/processed/titan/metabolite_titan_input.rds
+	code/run_titan_metabolites.R data/processed/titan/metabolite_titan_input.rds $@
+
+titan2 : $(TITAN_IN) $(TITAN_OUT) data/processed/titan/titan_fsumz.txt\
+data/processed/titan/titan_otu.txt results/titan_bartlett.txt\
+results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
+data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
