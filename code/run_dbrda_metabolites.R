@@ -15,6 +15,8 @@ clargs <- commandArgs(trailingOnly = TRUE)
 library(tidyverse)
 library(vegan)
 
+source("code/functions.R")
+
 # Metadata
 metadata <- read_tsv(clargs[2 : (length(clargs) - 2)]) %>%
   bind_rows(.) %>%
@@ -33,6 +35,8 @@ tree_id_filter <- env %>%
 
 # Metabolite data
 metabolites <- read_tsv(clargs[1]) %>%
+  filter(tree_id %in% tree_id_filter) %>%
+  drop_0conc_metab(.) %>%
   pivot_wider(
     id_cols = tree_id,
     names_from = "metabolite_id",
@@ -41,7 +45,6 @@ metabolites <- read_tsv(clargs[1]) %>%
   ) %>%
   
   # Order
-  filter(tree_id %in% tree_id_filter) %>%
   arrange(match(tree_id, rownames(env))) %>% 
   column_to_rownames(var = "tree_id") %>%
   as.data.frame(.)
