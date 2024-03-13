@@ -5,8 +5,8 @@
 # inputs : Trimmed phyloseq object
 # output : Metadata tibble
 # notes : expects order of inputs, output
-#   expects input paths for otu_processed/ps_trimmed.rds
-#   and output data/processed/<16S or ITS>/otu_processed/metadata_tibble.txt
+#   expects input paths for asv_processed/ps_trimmed.rds
+#   and output data/processed/<16S or ITS>/asv_processed/metadata_tibble.txt
 
 clargs <- commandArgs(trailingOnly = TRUE)
 

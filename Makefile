@@ -330,19 +330,17 @@ $(FINAL_ITS_ASV) : code/get_asv_tibble.R\
 		$$(PS_ITS_TRIMMED)
 	code/get_asv_tibble.R $(PS_ITS_TRIMMED) $@
 
-ps : $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED)
-
 #### Final metadata tibbles ####
 
 # 16S, metadata
-FINAL_16S_META=data/processed/16S/otu_processed/metadata_table.txt
+FINAL_16S_META=data/processed/16S/asv_processed/metadata_table.txt
 
 $(FINAL_16S_META) : code/get_metadata_tibble.R\
 		$$(PS_16S_TRIMMED)
 	code/get_metadata_tibble.R $(PS_16S_TRIMMED) $@
 
 # ITS, metadata
-FINAL_ITS_META=data/processed/ITS/otu_processed/metadata_table.txt
+FINAL_ITS_META=data/processed/ITS/asv_processed/metadata_table.txt
 
 $(FINAL_ITS_META) : code/get_metadata_tibble.R\
 		$$(PS_ITS_TRIMMED)
@@ -351,14 +349,14 @@ $(FINAL_ITS_META) : code/get_metadata_tibble.R\
 #### Final representative sequence fasta ####
 
 # 16S, representative sequences
-FINAL_16S_REPSEQS=data/processed/16S/otu_processed/representative_sequences.fasta
+FINAL_16S_REPSEQS=data/processed/16S/asv_processed/representative_sequences.fasta
 
 $(FINAL_16S_REPSEQS) : code/get_repseqs_fasta.R\
 		$$(PS_16S_TRIMMED)
 	code/get_repseqs_fasta.R $(PS_16S_TRIMMED) $@
 
 # ITS, representative sequences
-FINAL_ITS_REPSEQS=data/processed/ITS/otu_processed/representative_sequences.fasta
+FINAL_ITS_REPSEQS=data/processed/ITS/asv_processed/representative_sequences.fasta
 
 $(FINAL_ITS_REPSEQS) : code/get_repseqs_fasta.R\
 		$$(PS_ITS_TRIMMED)
@@ -367,14 +365,14 @@ $(FINAL_ITS_REPSEQS) : code/get_repseqs_fasta.R\
 #### Final taxonomy tibbles ####
 
 # 16S, taxonomy
-FINAL_16S_TAX=data/processed/16S/otu_processed/taxonomy_table.txt
+FINAL_16S_TAX=data/processed/16S/asv_processed/taxonomy_table.txt
 
 $(FINAL_16S_TAX) : code/get_taxonomy_tibble.R\
 		$$(PS_16S_TRIMMED)
 	code/get_taxonomy_tibble.R $(PS_16S_TRIMMED) $@
 
 # ITS, taxonomy
-FINAL_ITS_TAX=data/processed/ITS/otu_processed/taxonomy_table.txt
+FINAL_ITS_TAX=data/processed/ITS/asv_processed/taxonomy_table.txt
 
 $(FINAL_ITS_TAX) : code/get_taxonomy_tibble.R\
 		$$(PS_ITS_TRIMMED)
@@ -383,7 +381,7 @@ $(FINAL_ITS_TAX) : code/get_taxonomy_tibble.R\
 #### Final sequence summary tibbles ####
 
 # 16S sequence summary
-FINAL_16S_SUM=data/processed/16S/otu_processed/sequence_summary.txt
+FINAL_16S_SUM=data/processed/16S/asv_processed/sequence_summary.txt
 
 $(FINAL_16S_SUM) : code/get_seq_summary_tibble.R\
 		$$(PS_16S_UNTRIMMED)\
@@ -391,107 +389,107 @@ $(FINAL_16S_SUM) : code/get_seq_summary_tibble.R\
 	code/get_seq_summary_tibble.R $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $@
 
 # ITS sequence summary
-FINAL_ITS_SUM=data/processed/ITS/otu_processed/sequence_summary.txt
+FINAL_ITS_SUM=data/processed/ITS/asv_processed/sequence_summary.txt
 
 $(FINAL_ITS_SUM) : code/get_seq_summary_tibble.R\
 		$$(PS_ITS_UNTRIMMED)\
 		$$(PS_ITS_TRIMMED)
 	code/get_seq_summary_tibble.R $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED) $@
 
-otu : $(METADATA_16S) $(METADATA_ITS)\
+asv : $(METADATA_16S) $(METADATA_ITS)\
 $(METAB) $(TREE_AGE) $(TREE_AGE_SITE)\
 $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED) $(PS_ITS_UNTRIMMED) $(PS_ITS_TRIMMED)\
-$(FINAL_16S_OTU) $(FINAL_ITS_OTU) $(FINAL_16S_META) $(FINAL_ITS_META)\
+$(FINAL_16S_ASV) $(FINAL_ITS_ASV) $(FINAL_16S_META) $(FINAL_ITS_META)\
 $(FINAL_16S_REPSEQS) $(FINAL_ITS_REPSEQS) $(FINAL_16S_TAX) $(FINAL_ITS_TAX)\
 $(FINAL_16S_SUM) $(FINAL_ITS_SUM)
 
-#### Split OTU tables by habitat ####
+#### Split ASV tables by habitat ####
 
-# 16S OTU tables
-OTU_HAB_16S=data/processed/16S/otu_processed/BS_otu.txt data/processed/16S/otu_processed/RE_otu.txt data/processed/16S/otu_processed/RH_otu.txt
+# 16S ASV tables
+ASV_HAB_16S=data/processed/16S/asv_processed/BS_asv.txt data/processed/16S/asv_processed/RE_asv.txt data/processed/16S/asv_processed/RH_asv.txt
 
-$(OTU_HAB_16S) : code/split_otu.R\
+$(ASV_HAB_16S) : code/split_asv.R\
 		$$(FINAL_16S_META)\
-		$$(FINAL_16S_OTU)
-	code/split_otu.R $(FINAL_16S_META) $(FINAL_16S_OTU) $@
+		$$(FINAL_16S_ASV)
+	code/split_asv.R $(FINAL_16S_META) $(FINAL_16S_ASV) $@
 
-# ITS OTU tables
-OTU_HAB_ITS=data/processed/ITS/otu_processed/BS_otu.txt data/processed/ITS/otu_processed/RE_otu.txt data/processed/ITS/otu_processed/RH_otu.txt
+# ITS ASV tables
+ASV_HAB_ITS=data/processed/ITS/asv_processed/BS_asv.txt data/processed/ITS/asv_processed/RE_asv.txt data/processed/ITS/asv_processed/RH_asv.txt
 
-$(OTU_HAB_ITS) : code/split_otu.R\
+$(ASV_HAB_ITS) : code/split_asv.R\
 		$$(FINAL_ITS_META)\
-		$$(FINAL_ITS_OTU)
-	code/split_otu.R $(FINAL_ITS_META) $(FINAL_ITS_OTU) $@
+		$$(FINAL_ITS_ASV)
+	code/split_asv.R $(FINAL_ITS_META) $(FINAL_ITS_ASV) $@
 
 #### Split metadata tables by habitat ####
 
 # 16S metadata
-MET_HAB_16S=$(subst _otu.txt,_metadata.txt,$(OTU_HAB_16S))
+MET_HAB_16S=$(subst _asv.txt,_metadata.txt,$(ASV_HAB_16S))
 
 $(MET_HAB_16S) : code/split_metadata.R\
 		$$(FINAL_16S_META)\
-		$$(subst _metadata.txt,_otu.txt,$$@)
-	code/split_metadata.R $(FINAL_16S_META) $(subst _metadata.txt,_otu.txt,$@) $@
+		$$(subst _metadata.txt,_asv.txt,$$@)
+	code/split_metadata.R $(FINAL_16S_META) $(subst _metadata.txt,_asv.txt,$@) $@
 
 # ITS metadata
-MET_HAB_ITS=$(subst _otu.txt,_metadata.txt,$(OTU_HAB_ITS))
+MET_HAB_ITS=$(subst _asv.txt,_metadata.txt,$(ASV_HAB_ITS))
 
 $(MET_HAB_ITS) : code/split_metadata.R\
 		$$(FINAL_ITS_META)\
-		$$(subst _metadata.txt,_otu.txt,$$@)
-	code/split_metadata.R $(FINAL_ITS_META) $(subst _metadata.txt,_otu.txt,$@) $@
+		$$(subst _metadata.txt,_asv.txt,$$@)
+	code/split_metadata.R $(FINAL_ITS_META) $(subst _metadata.txt,_asv.txt,$@) $@
 
 #### Split representative sequences fasta by habitat ####
 
 # 16S representative sequences
-REPSEQ_HAB_16S=$(subst _otu.txt,_representative_sequences.fasta,$(OTU_HAB_16S))
+REPSEQ_HAB_16S=$(subst _asv.txt,_representative_sequences.fasta,$(ASV_HAB_16S))
 
 $(REPSEQ_HAB_16S) : code/split_repseqs.R\
 		$$(FINAL_16S_REPSEQS)\
-		$$(subst _representative_sequences.fasta,_otu.txt,$$@)
-	code/split_repseqs.R $(FINAL_16S_REPSEQS) $(subst _representative_sequences.fasta,_otu.txt,$@) $@
+		$$(subst _representative_sequences.fasta,_asv.txt,$$@)
+	code/split_repseqs.R $(FINAL_16S_REPSEQS) $(subst _representative_sequences.fasta,_asv.txt,$@) $@
 
 # ITS representative sequences
-REPSEQ_HAB_ITS=$(subst _otu.txt,_representative_sequences.fasta,$(OTU_HAB_ITS))
+REPSEQ_HAB_ITS=$(subst _asv.txt,_representative_sequences.fasta,$(ASV_HAB_ITS))
 
 $(REPSEQ_HAB_ITS) : code/split_repseqs.R\
 		$$(FINAL_ITS_REPSEQS)\
-		$$(subst _representative_sequences.fasta,_otu.txt,$$@)
-	code/split_repseqs.R $(FINAL_ITS_REPSEQS) $(subst _representative_sequences.fasta,_otu.txt,$@) $@
+		$$(subst _representative_sequences.fasta,_asv.txt,$$@)
+	code/split_repseqs.R $(FINAL_ITS_REPSEQS) $(subst _representative_sequences.fasta,_asv.txt,$@) $@
 
 #### Split taxonomy tables by habitat ####
 
 # 16S taxonomy
-TAX_HAB_16S=$(subst _otu.txt,_taxonomy_table.txt,$(OTU_HAB_16S))
+TAX_HAB_16S=$(subst _asv.txt,_taxonomy_table.txt,$(ASV_HAB_16S))
 
 $(TAX_HAB_16S) : code/split_taxonomy.R\
 		$$(FINAL_16S_TAX)\
-		$$(subst _taxonomy_table.txt,_otu.txt,$$@)
-	code/split_taxonomy.R $(FINAL_16S_TAX) $(subst _taxonomy_table.txt,_otu.txt,$@) $@
+		$$(subst _taxonomy_table.txt,_asv.txt,$$@)
+	code/split_taxonomy.R $(FINAL_16S_TAX) $(subst _taxonomy_table.txt,_asv.txt,$@) $@
 
 # ITS taxonomy
-TAX_HAB_ITS=$(subst _otu.txt,_taxonomy_table.txt,$(OTU_HAB_ITS))
+TAX_HAB_ITS=$(subst _asv.txt,_taxonomy_table.txt,$(ASV_HAB_ITS))
 
 $(TAX_HAB_ITS) : code/split_taxonomy.R\
 		$$(FINAL_ITS_TAX)\
-		$$(subst _taxonomy_table.txt,_otu.txt,$$@)
-	code/split_taxonomy.R $(FINAL_ITS_TAX) $(subst _taxonomy_table.txt,_otu.txt,$@) $@
+		$$(subst _taxonomy_table.txt,_asv.txt,$$@)
+	code/split_taxonomy.R $(FINAL_ITS_TAX) $(subst _taxonomy_table.txt,_asv.txt,$@) $@
 
 #### Rarefaction curves ####
 
 # Generate 16S rarefaction curves
-RARECURVE_16S=$(subst _otu.txt,_rarefaction_curves.txt,$(OTU_HAB_16S))
+RARECURVE_16S=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_16S))
 
 $(RARECURVE_16S) : code/get_rarefaction_curves.R\
-		$$(subst _rarefaction_curves.txt,_otu.txt,$$@)
-	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_otu.txt,$@) $@
+		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
 
 # Generate ITS rarefaction curves
-RARECURVE_ITS=$(subst _otu.txt,_rarefaction_curves.txt,$(OTU_HAB_ITS))
+RARECURVE_ITS=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_ITS))
 
 $(RARECURVE_ITS) : code/get_rarefaction_curves.R\
-		$$(subst _rarefaction_curves.txt,_otu.txt,$$@)
-	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_otu.txt,$@) $@
+		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
 
 # Make rarefaction curve figures
 RARECURVE_FIG=results/rarefaction_curves_fig.rds
@@ -511,12 +509,12 @@ results/rarefaction_curves_fig.pdf : code/save_figure.R\
 #### Total sequence counts by sample ####
 
 # Get sequence totals
-SAMPLE_SEQ_TOTAL=$(subst _otu.txt,_sample_total.txt,$(OTU_HAB_16S))\
-$(subst _otu.txt,_sample_total.txt,$(OTU_HAB_ITS))
+SAMPLE_SEQ_TOTAL=$(subst _asv.txt,_sample_total.txt,$(ASV_HAB_16S))\
+$(subst _asv.txt,_sample_total.txt,$(ASV_HAB_ITS))
 
 $(SAMPLE_SEQ_TOTAL) : code/get_sample_sequence_totals.R\
-		$$(subst _sample_total.txt,_otu.txt,$$@)
-	code/get_sample_sequence_totals.R $(subst _sample_total.txt,_otu.txt,$@) $@
+		$$(subst _sample_total.txt,_asv.txt,$$@)
+	code/get_sample_sequence_totals.R $(subst _sample_total.txt,_asv.txt,$@) $@
 
 # Make sequence total figures
 SAMPLE_SEQ_TOTAL_FIG=results/sample_sequence_totals_fig.rds
@@ -535,43 +533,43 @@ results/sample_sequence_totals_fig.pdf : code/save_figure.R\
 #### Subsample tables ####
 
 # Subsample with ranked scaling (SRS)
-OTU_SUB=$(subst _otu.txt,_sub_otu.txt,$(OTU_HAB_16S))\
-$(subst _otu.txt,_sub_otu.txt,$(OTU_HAB_ITS))
+ASV_SUB=$(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_16S))\
+$(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_ITS))
 
-$(OTU_SUB) : code/get_sub_otu.R\
-		$$(subst _sub_otu.txt,_otu.txt,$$@)
-	code/get_sub_otu.R $(subst _sub_otu.txt,_otu.txt,$@) $@
+$(ASV_SUB) : code/get_sub_asv.R\
+		$$(subst _sub_asv.txt,_asv.txt,$$@)
+	code/get_sub_asv.R $(subst _sub_asv.txt,_asv.txt,$@) $@
 
 # Metadata
-METADATA_SUB=$(subst _sub_otu.txt,_sub_metadata.txt,$(OTU_SUB))
+METADATA_SUB=$(subst _sub_asv.txt,_sub_metadata.txt,$(ASV_SUB))
 
 $(METADATA_SUB) : code/get_sub_metadata.R\
-		$$(subst _sub_metadata.txt,_sub_otu.txt,$$@)\
+		$$(subst _sub_metadata.txt,_sub_asv.txt,$$@)\
 		$$(subst _sub_metadata.txt,_metadata.txt,$$@)
-	code/get_sub_metadata.R $(subst _sub_metadata.txt,_sub_otu.txt,$@) $(subst _sub_metadata.txt,_metadata.txt,$@) $@
+	code/get_sub_metadata.R $(subst _sub_metadata.txt,_sub_asv.txt,$@) $(subst _sub_metadata.txt,_metadata.txt,$@) $@
 
 # Representative sequences
-REPSEQ_SUB=$(subst _sub_otu.txt,_sub_representative_sequences.fasta,$(OTU_SUB))
+REPSEQ_SUB=$(subst _sub_asv.txt,_sub_representative_sequences.fasta,$(ASV_SUB))
 
 $(REPSEQ_SUB) : code/get_sub_repseqs.R\
-		$$(subst _sub_representative_sequences.fasta,_sub_otu.txt,$$@)\
+		$$(subst _sub_representative_sequences.fasta,_sub_asv.txt,$$@)\
 		$$(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$$@)
-	code/get_sub_repseqs.R $(subst _sub_representative_sequences.fasta,_sub_otu.txt,$@) $(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$@) $@
+	code/get_sub_repseqs.R $(subst _sub_representative_sequences.fasta,_sub_asv.txt,$@) $(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$@) $@
 
 # Metadata
-TAX_SUB=$(subst _sub_otu.txt,_sub_taxonomy_table.txt,$(OTU_SUB))
+TAX_SUB=$(subst _sub_asv.txt,_sub_taxonomy_table.txt,$(ASV_SUB))
 
 $(TAX_SUB) : code/get_sub_taxonomy.R\
-		$$(subst _sub_taxonomy_table.txt,_sub_otu.txt,$$@)\
+		$$(subst _sub_taxonomy_table.txt,_sub_asv.txt,$$@)\
 		$$(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$$@)
-	code/get_sub_taxonomy.R $(subst _sub_taxonomy_table.txt,_sub_otu.txt,$@) $(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$@) $@
+	code/get_sub_taxonomy.R $(subst _sub_taxonomy_table.txt,_sub_asv.txt,$@) $(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$@) $@
 
-subsample : $(OTU_HAB_16S) $(OTU_HAB_ITS)\
+subsample : $(ASV_HAB_16S) $(ASV_HAB_ITS)\
 $(MET_HAB_16S) $(MET_HAB_ITS) $(REPSEQ_HAB_16S) $(REPSEQ_HAB_ITS)\
 $(TAX_HAB_16S) $(TAX_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS)\
 $(RARECURVE_FIG) results/rarefaction_curves_fig.pdf\
 $(SAMPLE_SEQ_TOTAL) $(SAMPLE_SEQ_TOTAL_FIG) results/sample_sequence_totals_fig.pdf\
-$(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
+$(ASV_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
@@ -579,28 +577,48 @@ $(OTU_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 #### 16S and ITS dbRDA ####
 
 # Run dbRDA
-DBRDA=$(subst _sub_otu.txt,_dbrda.rds,$(subst /otu_processed/,/dbrda/,$(OTU_SUB)))
+DBRDA=$(subst _sub_asv.txt,_dbrda.rds,$(subst /asv_processed/,/dbrda/,$(ASV_SUB)))
 
 $(DBRDA) : code/run_dbrda.R\
-		$$(subst _dbrda.rds,_sub_otu.txt,$$(subst /dbrda/,/otu_processed/,$$@))\
-		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/otu_processed/,$$@))
+		$$(subst _dbrda.rds,_sub_asv.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
+		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
 		$$(TREE_AGE_SITE)
-	code/run_dbrda.R $(subst _dbrda.rds,_sub_otu.txt,$(subst /dbrda/,/otu_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/otu_processed/,$@)) $(TREE_AGE_SITE) $@
+	code/run_dbrda.R $(subst _dbrda.rds,_sub_asv.txt,$(subst /dbrda/,/asv_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
 # Run dbRDA ANOVA
+DBRDA_ANOVA=$(subst _dbrda.rds,_dbrda_anova.txt,$(DBRDA))
 
-dbrda : $(DBRDA)
+$(DBRDA_ANOVA) : code/run_dbrda_anova.R\
+		$$(subst _dbrda_anova.txt,_dbrda.rds,$$@)
+	code/run_dbrda_anova.R $(subst _dbrda_anova.txt,_dbrda.rds,$@) $@
+
+#### Metabolites dbRDA ####
+
+# Run metabolite dbRDA
+data/processed/dbrda/metabolite_dbrda.rds : code/run_dbrda_metabolites.R\
+		$$(METAB)\
+		$$(METADATA_SUB)\
+		$$(TREE_AGE_SITE)
+	code/run_dbrda_metabolites.R $(METAB) $(METADATA_SUB) $(TREE_AGE_SITE) $@
+
+# Run dbRDA ANOVA
+results/metabolite_dbrda_anova.txt : code/run_dbrda_anova.R\
+		data/processed/dbrda/metabolite_dbrda.rds
+	code/run_dbrda_anova.R data/processed/dbrda/metabolite_dbrda.rds $@
+
+dbrda : $(DBRDA) $(DBRDA_ANOVA) data/processed/dbrda/metabolite_dbrda.rds\
+results/metabolite_dbrda_anova.txt
 
 #### 16S and ITS TITAN2 ####
 
 # Prepare 16S and ITS TITAN2 input data
-TITAN_IN=$(subst _sub_otu.txt,_titan_input.rds,$(subst /otu_processed/,/titan/,$(OTU_SUB)))
+TITAN_IN=$(subst _sub_asv.txt,_titan_input.rds,$(subst /asv_processed/,/titan/,$(ASV_SUB)))
 
 $(TITAN_IN) : code/get_titan_input.R\
-		$$(subst _titan_input.rds,_sub_otu.txt,$$(subst /titan/,/otu_processed/,$$@))\
-		$$(subst _titan_input.rds,_sub_metadata.txt,$$(subst /titan/,/otu_processed/,$$@))\
+		$$(subst _titan_input.rds,_sub_asv.txt,$$(subst /titan/,/asv_processed/,$$@))\
+		$$(subst _titan_input.rds,_sub_metadata.txt,$$(subst /titan/,/asv_processed/,$$@))\
 		$$(TREE_AGE_SITE)
-	code/get_titan_input.R $(subst _titan_input.rds,_sub_otu.txt,$(subst /titan/,/otu_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/otu_processed/,$@)) $(TREE_AGE_SITE) $@
+	code/get_titan_input.R $(subst _titan_input.rds,_sub_asv.txt,$(subst /titan/,/asv_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
 # Run 16S and ITS TITAN2
 TITAN_OUT=$(subst _titan_input.rds,_titan_output.rds,$(TITAN_IN))
@@ -615,10 +633,10 @@ data/processed/titan/titan_fsumz.txt : code/get_titan_fsumz.R\
 	code/get_titan_fsumz.R $(TITAN_OUT) $@
 
 # 16S and ITS TITAN2 OTUs
-data/processed/titan/titan_otu.txt : code/get_titan_otu.R\
+data/processed/titan/titan_asv.txt : code/get_titan_asv.R\
 		$$(TITAN_OUT)\
 		$$(TAX_SUB)
-	code/get_titan_otu.R $(TITAN_OUT) $(TAX_SUB) $@
+	code/get_titan_asv.R $(TITAN_OUT) $(TAX_SUB) $@
 
 # TITAN2 Bartlett test
 results/titan_bartlett.txt : code/run_titan_bartlett.R\
@@ -656,7 +674,9 @@ data/processed/titan/metabolite_titan_output.rds : code/run_titan_metabolites.R\
 		data/processed/titan/metabolite_titan_input.rds
 	code/run_titan_metabolites.R data/processed/titan/metabolite_titan_input.rds $@
 
-titan2 : $(TITAN_IN) $(TITAN_OUT) data/processed/titan/titan_fsumz.txt\
-data/processed/titan/titan_otu.txt results/titan_bartlett.txt\
-results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
-data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
+# titan2 : $(TITAN_IN) $(TITAN_OUT) data/processed/titan/titan_fsumz.txt\
+# data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
+# results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
+# data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
+
+titan2 : data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds

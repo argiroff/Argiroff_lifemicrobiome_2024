@@ -2,12 +2,12 @@
 
 # name : run_dbrda_anova.R
 # author: William Argiroff
-# inputs : subsampled OTU table and corresponding metadata
+# inputs : subsampled ASV table and corresponding metadata
 # output : .rds of dbRDA ordination
 # notes : expects order of inputs, output
 #   expects input paths for 
-#   data/processed/<16S or ITS>/otu_processed/<RE or RH or BS>_sub_otu.txt
-#   data/processed/<16S or ITS>/otu_processed/<RE or RH or BS>_sub_metadata.txt
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_sub_asv.txt
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_sub_metadata.txt
 #   and output data/processed/<16S or ITS>/dbrda/<RE or RH or BS>_dbrda.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)

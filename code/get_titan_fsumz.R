@@ -2,7 +2,7 @@
 
 # name : get_titan_fsumz.R
 # author: William Argiroff
-# inputs : titan2 output data (OTUs and metadata) split by habitat and site
+# inputs : titan2 output data (ASVs and metadata) split by habitat and site
 # output : text file of fsumz values
 # notes : expects order of inputs, output
 #   expects input paths for 

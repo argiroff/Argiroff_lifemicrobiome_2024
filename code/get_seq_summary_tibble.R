@@ -2,11 +2,12 @@
 
 # name : get_taxonomy_tibble.R
 # author: William Argiroff
-# inputs : Trimmed phyloseq object, OTU tibble
-# output : tibble of taxonomic classifications
+# inputs : Trimmed and untrimmed phyloseq objects
+# output : tibble of sequence totals
 # notes : expects order of inputs, output
-#   expects input paths for otu_processed/ps_trimmed.rds and output 
-#   data/processed/<16S or ITS>/otu_processed/taxonomy_tibble.txt
+#   expects input paths for asv_processed/ps_trimmed.rds 
+#   asv_processed/ps_untrimmed.rds and output 
+#   data/processed/<16S or ITS>/asv_processed/taxonomy_tibble.txt
 
 clargs <- commandArgs(trailingOnly = TRUE)
 

@@ -3,11 +3,11 @@
 # name : get_titan_input.R
 # author: William Argiroff
 # inputs : subsampled OTU data split by habitat, corresponding metadata table
-# output : titan2 input data (OTUs and metadata) split by habitat
+# output : titan2 input data (ASVs and metadata) split by habitat
 # notes : expects order of inputs, output
 #   expects input paths for 
-#   data/processed/<16S or ITS>/otu_processed/<RE or RH or BS>_sub_otu.txt
-#   data/processed/<16S or ITS>/otu_processed/<RE or RH or BS>_sub_metadata.txt
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_sub_asv.txt
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_sub_metadata.txt
 #   and output data/processed/<16S or ITS>/titan/<RE or RH or BS>_titan_input.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)
@@ -22,8 +22,8 @@ metadata <- read_tsv(clargs[2])
 tree_age <- read_rds(clargs[3]) %>%
   pluck("age_df")
 
-# OTU data
-otu <- read_tsv(clargs[1]) %>%
+# ASV data
+asv <- read_tsv(clargs[1]) %>%
   
   # Split by site
   inner_join(metadata, ., by = "sample_id") %>%
@@ -33,23 +33,23 @@ otu <- read_tsv(clargs[1]) %>%
   map(., .f = ungroup) %>%
   set_names(nm = c("site_A", "site_B", "site_D", "site_H")) %>%
   
-  # Filter out OTUs not present in at least 3 samples
-  map(., .f = drop_0seq_otus) %>%
-  map2(., rep(3, 4), .f = trim_otu_pa) %>%
+  # Filter out ASVs not present in at least 3 samples
+  map(., .f = drop_0seq_asvs) %>%
+  map2(., rep(3, 4), .f = trim_asv_pa) %>%
   map(., .f = drop_0seq_samples)
 
-#### Format TITAN OTU input ####
+#### Format TITAN ASV input ####
 
 format_titan_input <- function(x) {
   
-  # OTU
+  # ASV
   tmp1 <- x %>%
-    select(sample_id, otu_id, n_seqs) %>%
+    select(sample_id, asv_id, n_seqs) %>%
     
     # Wide format
     pivot_wider(
       id_cols = sample_id,
-      names_from = "otu_id",
+      names_from = "asv_id",
       values_from = "n_seqs",
       values_fill = 0
     ) %>%
@@ -72,14 +72,14 @@ format_titan_input <- function(x) {
   
   # Combine
   tmp4 <- list(tmp1, tmp3) %>%
-    set_names(nm = c("otu_df", "env_df"))
+    set_names(nm = c("asv_df", "env_df"))
   
   return(tmp4)
   
 }
 
-# OTU table
-titan_input <- otu %>%
+# ASV table
+titan_input <- asv %>%
   map(., .f = format_titan_input)
 
 # Save

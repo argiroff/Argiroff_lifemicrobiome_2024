@@ -5,7 +5,7 @@
 # inputs : untrimmed phyloseq
 # output : trimmed phyloseq object
 # notes : expects order of inputs, output
-#   -- output data/processed/16S/otu_processed/ps_trimmed.rds
+#   -- output data/processed/16S/asv_processed/ps_trimmed.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)
 

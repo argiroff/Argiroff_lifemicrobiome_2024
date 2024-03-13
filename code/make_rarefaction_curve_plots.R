@@ -6,7 +6,7 @@
 # output : R data object of rarefaction curve plot
 # notes : expects order of inputs, output
 #   expects input paths for 
-#   data/processed/<16S or ITS>/otu_processed/<RE or RH or BS>_rarefaction_curves.txt 
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_rarefaction_curves.txt 
 #   and output results/rarefaction_curve_fig.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)
@@ -65,7 +65,7 @@ get_rarefaction_fig <- function(input.data) {
       data = input.data, 
       aes(
         x = n_seqs, 
-        y = n_otus, 
+        y = n_asvs, 
         group = sample_id, 
         colour = plant_habitat)
     ) +
@@ -82,7 +82,7 @@ get_rarefaction_fig <- function(input.data) {
     labs(
       title = NULL,
       x = "Number of sequences",
-      y = "Number of OTUs"
+      y = "Number of ASVs"
     ) +
     
     # Grid

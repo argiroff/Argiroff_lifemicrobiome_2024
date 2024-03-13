@@ -1,13 +1,13 @@
-#### Drop OTUs with no sequences ####
+#### Drop ASVs with no sequences ####
 
-drop_0seq_otus <- function(x) {
+drop_0seq_asvs <- function(x) {
   
   tmp1 <- x %>%
-    group_by(otu_id) %>%
-    mutate(otu_n_seqs = sum(n_seqs)) %>%
+    group_by(asv_id) %>%
+    mutate(asv_n_seqs = sum(n_seqs)) %>%
     ungroup(.) %>%
-    filter(otu_n_seqs > 0) %>%
-    select(-otu_n_seqs)
+    filter(asv_n_seqs > 0) %>%
+    select(-asv_n_seqs)
   
   return(tmp1)
   
@@ -82,22 +82,22 @@ format_axis <- function(x) {
   
 }
 
-#### Trim OTUs based on presence/absence ####
+#### Trim ASVs based on presence/absence ####
 
-trim_otu_pa <- function(x, otu.pa) {
+trim_asv_pa <- function(x, asv.pa) {
   
-  # OTU ID filter
+  # ASV ID filter
   tmp1 <- x %>%
-    mutate(otu_pa = ifelse(n_seqs > 0, 1, 0)) %>%
-    group_by(otu_id) %>%
-    summarise(otu_total_pa = sum(otu_pa)) %>%
+    mutate(asv_pa = ifelse(n_seqs > 0, 1, 0)) %>%
+    group_by(asv_id) %>%
+    summarise(asv_total_pa = sum(asv_pa)) %>%
     ungroup() %>%
-    filter(otu_total_pa >= otu.pa) %>%
-    pull(otu_id)
+    filter(asv_total_pa >= asv.pa) %>%
+    pull(asv_id)
   
   # Trim
   tmp2 <- x %>%
-    filter(otu_id %in% tmp1)
+    filter(asv_id %in% tmp1)
   
   return(tmp2)
   

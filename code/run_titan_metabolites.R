@@ -32,8 +32,8 @@ site_TITAN_metab <- function(x, y) {
     nBoot = 1000,
     imax = FALSE,
     ivTot = FALSE,
-    pur.cut = 0.7,
-    rel.cut = 0.7,
+    pur.cut = 0.95,
+    rel.cut = 0.95,
     ncpus = 10,
     memory = FALSE
   )

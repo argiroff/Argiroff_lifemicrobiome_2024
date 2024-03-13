@@ -3,11 +3,11 @@
 # name : make_16s_ps_untrimmed.R
 # author: William Argiroff
 # inputs : Sequence sample metadata files
-#   merged OTU qza, merged tax qza, merged repseq qza
+#   merged ASV qza, merged tax qza, merged repseq qza
 # output : phyloseq object
 # notes : expects order of inputs, output
-#   expects input paths for merged OTU and rep seqs qzas, tax qza, and metadata
-#   and output data/processed/16S/otu_processed/ps_untrimmed.rds
+#   expects input paths for merged ASV and rep seqs qzas, tax qza, and metadata
+#   and output data/processed/16S/asv_processed/ps_untrimmed.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)
 
