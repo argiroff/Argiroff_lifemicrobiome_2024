@@ -621,22 +621,79 @@ $(TITAN_IN) : code/get_titan_input.R\
 	code/get_titan_input.R $(subst _titan_input.rds,_sub_asv.txt,$(subst /titan/,/asv_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
 # Run 16S and ITS TITAN2
-TITAN_OUT=$(subst _titan_input.rds,_titan_output.rds,$(TITAN_IN))
+TITAN_60_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/60/,$(TITAN_IN)))
 
-$(TITAN_OUT) : code/run_titan.R\
-		$$(subst _titan_output.rds,_titan_input.rds,$$@)
-	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$@) $@
+$(TITAN_60_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/60/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/60/,/titan/,$@)) $@
 
-# 16S and ITS TITAN2 fzumz
+# Run 16S and ITS TITAN2
+TITAN_65_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/65/,$(TITAN_IN)))
+
+$(TITAN_65_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/65/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/65/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_70_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/70/,$(TITAN_IN)))
+
+$(TITAN_70_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/70/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/70/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_75_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/75/,$(TITAN_IN)))
+
+$(TITAN_75_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/75/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/75/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_80_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/80/,$(TITAN_IN)))
+
+$(TITAN_80_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/80/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/80/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_85_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/85/,$(TITAN_IN)))
+
+$(TITAN_85_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/85/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/85/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_90_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/90/,$(TITAN_IN)))
+
+$(TITAN_90_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/90/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/90/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_95_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/95/,$(TITAN_IN)))
+
+$(TITAN_95_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/95/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/95/,/titan/,$@)) $@
+
+# Run 16S and ITS TITAN2
+TITAN_99_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/99/,$(TITAN_IN)))
+
+$(TITAN_99_OUT) : code/run_titan.R\
+		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/99/,/titan/,$$@))
+	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/99/,/titan/,$@)) $@
+
+# TITAN2 fsumz
 data/processed/titan/titan_fsumz.txt : code/get_titan_fsumz.R\
-		$$(TITAN_OUT)
-	code/get_titan_fsumz.R $(TITAN_OUT) $@
-
-# 16S and ITS TITAN2 OTUs
-data/processed/titan/titan_asv.txt : code/get_titan_asv.R\
-		$$(TITAN_OUT)\
-		$$(TAX_SUB)
-	code/get_titan_asv.R $(TITAN_OUT) $(TAX_SUB) $@
+		$$(TITAN_60_OUT)\
+		$$(TITAN_65_OUT)\
+		$$(TITAN_70_OUT)\
+		$$(TITAN_75_OUT)\
+		$$(TITAN_80_OUT)\
+		$$(TITAN_85_OUT)\
+		$$(TITAN_90_OUT)\
+		$$(TITAN_95_OUT)
+	code/get_titan_fsumz.R $(TITAN_60_OUT) $(TITAN_65_OUT) $(TITAN_70_OUT) $(TITAN_75_OUT) $(TITAN_80_OUT) $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $@
 
 # TITAN2 Bartlett test
 results/titan_bartlett.txt : code/run_titan_bartlett.R\
@@ -657,7 +714,7 @@ results/titan_fsumz_fig.rds : code/make_titan_fsumz_fig.R\
 # Save fsumz figure as a pdf
 results/titan_fsumz_fig.pdf : code/save_figure.R\
 		results/titan_fsumz_fig.rds
-	code/save_figure.R results/titan_fsumz_fig.rds "pdf" "NULL" "6.5" "5" "in" $@
+	code/save_figure.R results/titan_fsumz_fig.rds "pdf" "NULL" "6.5" "7.5" "in" $@
 
 #### Metabolite TITAN2 ####
 
@@ -674,9 +731,30 @@ data/processed/titan/metabolite_titan_output.rds : code/run_titan_metabolites.R\
 		data/processed/titan/metabolite_titan_input.rds
 	code/run_titan_metabolites.R data/processed/titan/metabolite_titan_input.rds $@
 
-# titan2 : $(TITAN_IN) $(TITAN_OUT) data/processed/titan/titan_fsumz.txt\
-# data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
-# results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
-# data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
+titan2 : $(TITAN_IN) $(TITAN_60_OUT) $(TITAN_65_OUT) $(TITAN_70_OUT) $(TITAN_75_OUT) $(TITAN_80_OUT)\
+$(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $(TITAN_99_OUT) #data/processed/titan/titan_fsumz.txt\
+data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
+results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
+data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
 
-titan2 : data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
+titan2b : data/processed/titan/titan_fsumz.txt results/titan_bartlett.txt\
+results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf
+
+#### Relationships between community composition and metabolites ####
+
+# Calculate Bray-Curtis distance matrices
+BC_DIST=$(subst _sub_asv.txt,_bc_dist.rds,$(ASV_SUB))
+
+$(BC_DIST) : code/get_bc_dist.R\
+		$$(subst _bc_dist.rds,_sub_asv.txt,$$@)\
+		$$(subst _bc_dist.rds,_sub_metadata.txt,$$@)\
+		$$(TREE_AGE_SITE)\
+		$$(METAB)
+	code/get_bc_dist.R $(subst _bc_dist.rds,_sub_asv.txt,$@) $(subst _bc_dist.rds,_sub_metadata.txt,$@) $(TREE_AGE_SITE) $(METAB) $@
+
+# Mantel tests
+results/comp_metab_mantel.txt : code/run_mantel.R\
+		$$(BC_DIST)
+	code/run_mantel.R $(BC_DIST) $@
+
+comp_metab : $(BC_DIST) results/comp_metab_mantel.txt

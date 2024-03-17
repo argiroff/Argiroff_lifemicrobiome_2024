@@ -17,6 +17,23 @@ library(TITAN2)
 # Read in data
 titan_input <- read_rds(clargs[1])
 
+#### Function to convert to proportion ####
+
+perc_to_prop <- function(x) {
+  
+  tmp1 <- x / 100
+  
+  return(tmp1)
+  
+}
+
+# Get cutoff
+titan_cutoff <- clargs[2] %>%
+  str_remove(., "data/processed/16S/titan/|data/processed/ITS/titan/") %>%
+  str_remove(., "/.*") %>%
+  as.numeric(.) %>%
+  perc_to_prop(.)
+
 #### Function to run TITAN by site, inner function ####
 
 site_TITAN <- function(x, y) {
@@ -32,8 +49,8 @@ site_TITAN <- function(x, y) {
     nBoot = 1000,
     imax = FALSE,
     ivTot = FALSE,
-    pur.cut = 0.9,
-    rel.cut = 0.9,
+    pur.cut = titan_cutoff,
+    rel.cut = titan_cutoff,
     ncpus = 10,
     memory = FALSE
   )

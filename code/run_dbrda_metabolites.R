@@ -48,7 +48,7 @@ metabolites <- read_tsv(clargs[1]) %>%
 
 # Run dbRDA
 dbrda_output <- capscale(
-  metabolites ~ tree_age_full * site,
+  metabolites ~ tree_age_site * site,
   data = env,
   distance = "bray",
   sqrt.dist = TRUE

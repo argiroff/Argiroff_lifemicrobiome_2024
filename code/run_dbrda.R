@@ -44,7 +44,7 @@ env <- read_rds(clargs[3]) %>%
 
 # Run dbRDA
 dbrda_output <- capscale(
-  asv ~ tree_age_full * site,
+  asv ~ tree_age_site * site,
   data = env,
   distance = "bray",
   sqrt.dist = TRUE
