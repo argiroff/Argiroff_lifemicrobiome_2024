@@ -110,7 +110,8 @@ get_TITAN_list_names <- function(x) {
   tmp1 <- x %>%
     str_remove(., "data/processed/") %>%
     str_remove(., "_titan_output.rds") %>%
-    str_replace(., "/titan/", "_")
+    str_replace(., "/titan/", "_") %>%
+    str_replace(., "/", "_")
   
   return(tmp1)
 }
@@ -123,7 +124,7 @@ format_TITAN_outputs <- function(x) {
   tmp1 <- x %>%
     separate(
       col = ID,
-      into = c("community", "plant_habitat"),
+      into = c("community", "cutoff", "plant_habitat"),
       sep = "_"
     ) %>%
     
@@ -131,6 +132,8 @@ format_TITAN_outputs <- function(x) {
       
       community = ifelse(community == "16S", "Bacteria and Archaea", community),
       community = ifelse(community == "ITS", "Fungi", community),
+      
+      cutoff = round(as.numeric(cutoff) / 100, 2),
       
       plant_habitat = ifelse(plant_habitat == "BS", "Soil", plant_habitat),
       plant_habitat = ifelse(plant_habitat == "RH", "Rhizosphere", plant_habitat),
@@ -177,6 +180,54 @@ drop_0conc_trees <- function(x) {
     ungroup(.) %>%
     filter(tree_concentration > 0) %>%
     select(-tree_concentration)
+  
+  return(tmp1)
+  
+}
+
+#### Function to format fsumz ####
+
+format_fsumz <- function(x) {
+  
+  tmp1 <- x %>%
+    
+    # Format
+    mutate(
+      
+      cutoff = ifelse(str_detect(variable, "f"), cutoff, 0),
+      
+      variable = ifelse(
+        str_detect(variable, "sumz-"),
+        "Decreasing",
+        "Increasing"
+      ),
+      
+      plant_habitat = factor(
+        plant_habitat,
+        levels = c("Root endosphere", "Rhizosphere", "Soil")
+      ),
+      
+      variable = factor(
+        variable,
+        levels = c("Decreasing", "Increasing")
+      ),
+      
+      community = factor(
+        community,
+        levels = c("Bacteria and Archaea", "Fungi")
+      )
+    ) %>%
+    
+    # Mean 0
+    group_by(cutoff, community, plant_habitat, site, variable) %>%
+    summarise(cp = mean(cp)) %>%
+    ungroup(.) %>%
+    filter(!is.na(cp)) %>%
+    group_by(cutoff, community, plant_habitat, site) %>%
+    mutate(n_val = n()) %>%
+    ungroup(.) %>%
+    filter(n_val == 2) %>%
+    select(-n_val)
   
   return(tmp1)
   

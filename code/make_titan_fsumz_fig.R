@@ -18,59 +18,30 @@ source("code/functions.R")
 
 # Read in data
 titan_fsumz <- read_tsv(clargs[1]) %>%
-  filter(!is.na(cp)) %>%
-  mutate(
-    
-    plant_habitat = factor(
-      plant_habitat,
-      levels = c("Root endosphere", "Rhizosphere", "Soil")
-    ),
-    
-    variable = factor(
-      variable,
-      levels = c("Decreasing", "Increasing")
-    ),
-
-    community = factor(
-      community,
-      levels = c("Bacteria and Archaea", "Fungi")
-    )
-  )
+  format_fsumz(.)
 
 # Means
 titan_fsumz_means <- titan_fsumz %>%
-  group_by(variable) %>%
+  group_by(cutoff, variable) %>%
   summarise(
     mean_cp = mean(cp),
     se_cp = se(cp)
   ) %>%
-  ungroup(.) %>%
-  mutate(
-    variable = factor(
-      variable,
-      levels = c("Decreasing", "Increasing")
-    )
-  )
+  ungroup(.)
 
 # t test results
 fsumz_ttest_pval <- read_tsv(clargs[2]) %>%
-  pull(p.value)
-
-# P value
-if(fsumz_ttest_pval < 0.001) {
-  
-  fsumz_ttest_pval_label <- "italic(P) < 0.001"
-  
-} else {
-  
-  fsumz_ttest_pval_label <- paste("italic(P) = ", round(fsumz_ttest_pval, 3), sep = "")
-  
-}
-
-# Tibble
-fsumz_ttest_pval_label_tbl <- tibble(
-  pval_label = fsumz_ttest_pval_label
-)
+  mutate(
+    
+    pval_label = NA,
+    
+    pval_label = ifelse(
+      p.value < 0.001,
+      "italic(P) < 0.001",
+      paste("italic(P) = ", round(p.val, 3), sep = "")
+    )
+    
+  )
 
 # Figure
 fsumz_fig <- ggplot() +
@@ -94,7 +65,7 @@ fsumz_fig <- ggplot() +
       fill = plant_habitat,
       shape = community
     ),
-    size = 2.5
+    size = 2
   ) +
   
   geom_errorbar(
@@ -122,10 +93,10 @@ fsumz_fig <- ggplot() +
   ) +
   
   geom_text(
-    data = fsumz_ttest_pval_label_tbl,
-    aes(x = 1.5, y = 112.5, label = pval_label),
+    data = fsumz_ttest_pval,
+    aes(x = 1.5, y = 108, label = pval_label),
     parse = TRUE,
-    size = 4
+    size = 3
   ) +
   
   scale_colour_viridis(
@@ -139,18 +110,22 @@ fsumz_fig <- ggplot() +
     discrete = TRUE,
     begin = 0.9,
     end = 0,
-    name = "Stand"
+    name = "Habitat"
   ) +
   
   scale_shape_manual(
-    name = NULL,
+    name = "Community",
     values = c(21, 24)
   ) +
   
   labs(
     title = NULL,
-    x = "OTU relationship with tree age",
+    x = "ASV relationship with tree age",
     y = "Community change point (tree age, y)"
+  ) +
+  
+  facet_wrap(
+    ~ cutoff
   ) +
   
   # Formatting
@@ -169,10 +144,16 @@ fsumz_fig <- ggplot() +
     axis.text.y = element_text(colour = "black"),
     axis.ticks = element_line(colour = "black"),
     
+    # Facets
+    strip.background = element_blank(),
+    strip.text = element_text(colour = "black", size = 10),
+    
     # Legend
     legend.key = element_blank(),
     legend.text = element_text(colour = "black", size = 10, hjust = 0),
-    legend.position = "right"
+    legend.position = "bottom",
+    legend.box = "vertical",
+    legend.margin = margin()
     
   ) +
   

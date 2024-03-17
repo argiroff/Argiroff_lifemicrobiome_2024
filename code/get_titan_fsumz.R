@@ -6,7 +6,7 @@
 # output : text file of fsumz values
 # notes : expects order of inputs, output
 #   expects input paths for 
-#   data/processed/<16S or ITS>/titan/<RE or RH or BS>_titan_output.rds
+#   data/processed/<16S or ITS>/titan/*/<RE or RH or BS>_titan_output.rds
 #   and output data/processed/titan/titan_fsumz.txt
 
 clargs <- commandArgs(trailingOnly = TRUE)
@@ -19,17 +19,16 @@ source("code/functions.R")
 titan_output_names <- clargs[1 : (length(clargs) - 1)] %>%
   get_TITAN_list_names(.)
 
-#### Get TITAN fsumz, inner ####
+#### Get TITAN sumz, inner ####
 
-get_TITAN_fsumz_inner <- function(x) {
+get_TITAN_sumz_inner <- function(x) {
   
   tmp1 <- x$sumz.cp %>%
     as.data.frame(.) %>%
     as_tibble(rownames = NA) %>%
     rownames_to_column(var = "variable") %>%
     
-    # Select fsumz
-    filter(variable == "fsumz-" | variable == "fsumz+") %>%
+    # Select columnds
     select(variable, cp, `0.05`, `0.95`) %>%
     rename(
       lci = "0.05",
@@ -40,11 +39,11 @@ get_TITAN_fsumz_inner <- function(x) {
   
 }
 
-#### Get TITAN fsumz outer ####
+#### Get TITAN sumz outer ####
 
-get_TITAN_fsumz <- function(x) {
+get_TITAN_sumz <- function(x) {
   
-  tmp1 <- map(x, .f = get_TITAN_fsumz_inner) %>%
+  tmp1 <- map(x, .f = get_TITAN_sumz_inner) %>%
     bind_rows(.id = "site") %>%
     mutate(site = str_remove(site, "site_"))
   
@@ -56,15 +55,11 @@ get_TITAN_fsumz <- function(x) {
 titan_output <- clargs[1 : (length(clargs) - 1)] %>%
   map(., .f = read_rds) %>%
   set_names(nm = titan_output_names) %>%
-  map(., get_TITAN_fsumz) %>%
+  map(., get_TITAN_sumz) %>%
   
   # Combine
   bind_rows(.id = "ID") %>%
-  format_TITAN_outputs(.) %>%
-  mutate(
-    variable = ifelse(variable == "fsumz-", "Decreasing", variable),
-    variable = ifelse(variable == "fsumz+", "Increasing", variable)
-  )
+  format_TITAN_outputs(.)
 
 # Save
 write_tsv(
