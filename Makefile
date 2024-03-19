@@ -758,3 +758,43 @@ results/comp_metab_mantel.txt : code/run_mantel.R\
 	code/run_mantel.R $(BC_DIST) $@
 
 comp_metab : $(BC_DIST) results/comp_metab_mantel.txt
+
+#### SPIEC-EASI input ####
+
+# Combined 16S, ITS, metabolits table
+data/processed/spieceasi/comb_16s_its_metab.txt : code/get_combined_asv_metab_table.R\
+		$$(FINAL_16S_META)\
+		$$(FINAL_ITS_META)\
+		$$(FINAL_16S_ASV)\
+		$$(FINAL_ITS_ASV)\
+		$$(METAB)
+	code/get_combined_asv_metab_table.R $(FINAL_16S_META) $(FINAL_ITS_META) $(FINAL_16S_ASV) $(FINAL_ITS_ASV) $(METAB) $@
+
+# Get input
+SPIECEASI_IN_NAMES=bs re rh
+
+SPIECEASI_IN_PATH=$(foreach path,$(SPIECEASI_IN_NAMES),data/processed/spieceasi/$(path))
+
+# 16S
+SPIECEASI_16S_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_16s_input.rds)
+
+$(SPIECEASI_16S_IN) : code/get_input_for_spieceasi.R\
+		data/processed/spieceasi/comb_16s_its_metab.txt
+	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
+
+# ITS inputs
+SPIECEASI_ITS_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_its_input.rds)
+
+$(SPIECEASI_ITS_IN) : code/get_input_for_spieceasi.R\
+		data/processed/spieceasi/comb_16s_its_metab.txt
+	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
+
+# Metabolite inputs
+SPIECEASI_METAB_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_metab_input.rds)
+
+$(SPIECEASI_METAB_IN) : code/get_input_for_spieceasi.R\
+		data/processed/spieceasi/comb_16s_its_metab.txt
+	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
+
+spieceasi : data/processed/spieceasi/comb_16s_its_metab.txt\
+$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_METAB_IN) 

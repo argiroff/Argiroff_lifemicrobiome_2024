@@ -232,3 +232,89 @@ format_fsumz <- function(x) {
   return(tmp1)
   
 }
+
+#### Drop absent features ####
+
+drop_0relabund_features <- function(x) {
+  
+  tmp1 <- x %>%
+    group_by(feature_id) %>%
+    mutate(feature_relabund = sum(relabund)) %>%
+    ungroup(.) %>%
+    filter(feature_relabund > 0) %>%
+    select(-feature_relabund)
+  
+  return(tmp1)
+  
+}
+
+#### Drop samples with relative abundance ####
+
+drop_0relabund_trees <- function(x) {
+  
+  tmp1 <- x %>%
+    group_by(tree_id) %>%
+    mutate(tree_relabund = sum(relabund)) %>%
+    ungroup(.) %>%
+    filter(tree_relabund > 0) %>%
+    select(-tree_relabund)
+  
+  return(tmp1)
+  
+}
+
+#### Function to filter features ####
+
+filter_features <- function(feature.tab, feature.prev, sample.cut) {
+  
+  tmp1 <- feature.tab %>%
+    group_by(tree_id) %>%
+    mutate(feature_relabund = sum(relabund)) %>%
+    ungroup(.)
+  
+  tmp2 <- length(unique(tmp1$tree_id))
+  
+  tmp3 <- tmp1 %>%
+    mutate(pres_abs = ifelse(relabund > 0, 1, 0)) %>%
+    group_by(feature_id) %>%
+    summarise(tree_pres = sum(pres_abs)) %>%
+    ungroup() %>%
+    mutate(prop_tree_pres = tree_pres / tmp2) %>%
+    filter(prop_tree_pres >= feature.prev) %>%
+    pull(feature_id)
+  
+  tmp4 <- tmp1 %>%
+    filter(feature_id %in% tmp3) %>%
+    group_by(tree_id) %>% 
+    mutate(remaining_relabund = sum(relabund)) %>% 
+    ungroup() %>% 
+    filter(remaining_relabund >= sample.cut) %>% 
+    select(data_type, plant_habitat, sample_id, tree_id, feature_id, relabund)
+  
+  return(tmp4)
+  
+}
+
+#### Function to get tree ID filter ####
+
+get_tree_id_filter <- function(asv.ba, asv.fungi, metab) {
+  
+  tmp1 <- asv.ba %>%
+    select(tree_id) %>%
+    distinct(.)
+  
+  tmp2 <- asv.fungi %>%
+    select(tree_id) %>%
+    distinct(.)
+  
+  tmp3 <- metab %>%
+    select(tree_id) %>%
+    distinct(.) %>%
+    inner_join(tmp2, ., by = "tree_id") %>%
+    inner_join(tmp1, ., by = "tree_id") %>%
+    arrange(tree_id) %>%
+    pull(tree_id)
+  
+  return(tmp3)
+  
+}
