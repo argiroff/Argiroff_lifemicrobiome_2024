@@ -797,4 +797,4 @@ $(SPIECEASI_METAB_IN) : code/get_input_for_spieceasi.R\
 	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
 
 spieceasi : data/processed/spieceasi/comb_16s_its_metab.txt\
-$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_METAB_IN) 
+$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_METAB_IN)
