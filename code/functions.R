@@ -318,3 +318,182 @@ get_tree_id_filter <- function(asv.ba, asv.fungi, metab) {
   return(tmp3)
   
 }
+
+#### Function to get dbRDA scores ####
+
+get_dbRDA_scores <- function(x, env_tab) {
+  
+  tmp1 <- scores(
+    x,
+    # Select the first two axes
+    choices = c(1, 2),
+    # Get plots and ASV scores
+    display = "all",
+    # Get a nicer output
+    tidy = TRUE
+  ) %>% 
+    
+    as_tibble(rownames = NA) %>%
+    rownames_to_column(var = "sample_id")
+  
+  # Get sample loadings
+  tmp2 <- tmp1 %>%
+    filter(score == "sites") %>%
+    select(-label) %>%
+    mutate(sample_id = str_replace_all(sample_id, "\\.", "-")) %>%
+    inner_join(env_tab, ., by = "sample_id")
+  
+  # Get variable loadings
+  tmp3 <- tmp1 %>%
+    filter(score == "biplot") %>% 
+    rename(env_variable = "sample_id")
+  
+  # Get eigenvalues for axis contributions
+  tmp4 <- x$CCA$eig / sum(x$CCA$eig)
+  tmp5 <- round(100 * tmp4[1], 0)
+  tmp6 <- round(100 * tmp4[2], 0)
+  
+  # Taxa
+  tmp7 <- tmp1 %>%
+    filter(score == "species")
+  
+  # Combine
+  tmp8 <- list(
+    tmp7, tmp2, tmp3, tmp5, tmp6
+  ) %>%
+    set_names(nm = c("asvs", "loadings", "biplot", "axis1", "axis2"))
+  
+  # Return
+  return(tmp8)
+  
+}
+
+#### Function to generate dbRDA plots ####
+
+plot_dbRDA <- function(
+    dbrda.ord,
+    # dbrda.aov,
+    plot.title
+) {
+  
+  tmp1 <- ggplot() +
+    
+    geom_vline(
+      xintercept = 0,
+      linetype = 2,
+      linewidth = 0.5,
+      colour = "black"
+    ) +
+    
+    geom_hline(
+      yintercept = 0,
+      linetype = 2,
+      linewidth = 0.5,
+      colour = "black"
+    ) +
+    
+    geom_point(
+      data = dbrda.ord$loadings,
+      aes(x = CAP1, y = CAP2, shape = site, colour = tree_age_site),
+      alpha = 0.65
+    ) +
+    
+    scale_shape_manual(
+      name = "Stand",
+      values = c(16, 15, 17, 18)
+    ) +
+    
+    scale_colour_viridis(
+      name = "Tree age",
+      option = "plasma"
+    ) +
+    
+    # geom_text(
+    #   data = dbrda.aov,
+    #   aes(x = xpos, y = ypos, label = sig_label),
+    #   parse = TRUE,
+    #   size = 3
+    # ) +
+    
+    labs(
+      title = plot.title, 
+      x = bquote('Axis 1 (' * .(dbrda.ord$axis1) * '%)'),
+      y = bquote('Axis 2 (' * .(dbrda.ord$axis2) * '%)')
+    ) + 
+    
+    theme(
+      
+      # Panel
+      panel.border = element_rect(colour = "black", fill = NA, linewidth = 1),
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      
+      # Titles
+      plot.title = element_text(colour = "black", size = 14, hjust = 0, face = "bold"),
+      axis.title = element_text(colour = "black", size = 12),
+      
+      # Axis
+      axis.ticks = element_line(colour = "black", linewidth = 0.25),
+      axis.text = element_text(colour = "black", size = 10),
+      
+      # Legend
+      legend.key = element_blank(), 
+      legend.background = element_blank(),
+      legend.title = element_text(colour = "black", size = 10), 
+      legend.text = element_text(colour = "black", size = 8),
+      legend.position = "bottom"
+      
+    )
+  
+  return(tmp1)
+  
+}
+
+#### Function to format dbRDA ANOVAs ####
+
+format_dbRDA_aov <- function(x) {
+  
+  aov_results <- x %>%
+    select(variable, `Pr(>F)`) %>%
+    filter(variable != "Residual") %>%
+    
+    mutate(
+      
+      variable = ifelse(
+        variable == "tree_age_site",
+        "Age",
+        variable
+      ),
+      
+      variable = ifelse(
+        variable == "site",
+        "Stand",
+        variable
+      ),
+      
+      variable = ifelse(
+        variable == "tree_age_site:site",
+        "Age%*%stand",
+        variable
+      ),
+      
+      `Pr(>F)` = ifelse(
+        `Pr(>F)` == 0.001,
+        "italic(P)<0.001",
+        paste("italic(P)=", `Pr(>F)`, sep = "")
+      )
+      
+    ) %>%
+    
+    # Combine
+    unite(sig_label, variable, `Pr(>F)`, sep = "~") %>%
+    pull(sig_label)
+  
+  # Add new lines
+  aov_out <- tibble(
+    sig_label = paste(aov_results, collapse = "\n")
+  )
+  
+  return(aov_out)
+  
+}

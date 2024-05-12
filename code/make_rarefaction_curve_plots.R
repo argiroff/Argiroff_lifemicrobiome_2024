@@ -116,9 +116,9 @@ get_rarefaction_fig <- function(input.data) {
       legend.key = element_blank(),
       legend.text = element_text(colour = "black", size = 10, hjust = 0),
       legend.position = "bottom",
-      
+
       # Margins
-      plot.margin = margin(5.5, 9.5, 5.5, 5.5, "pt")   
+      plot.margin = margin(5.5, 9.5, 5.5, 5.5, "pt")
       
     )
   
@@ -135,8 +135,10 @@ rarefaction_figs <- rarefaction_results %>%
   set_names(nm = c("ba", "fungi"))
 
 # Get legend
-rarefaction_legend <- get_legend(
-  rarefaction_figs$ba
+rarefaction_legend <- get_plot_component(
+  rarefaction_figs$ba,
+  "guide-box-bottom",
+  return_all = TRUE
 )
 
 # Combine figure panels

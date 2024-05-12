@@ -3,3 +3,9 @@ data/
 .Rproj.user
 results/
 .Rhistory
+manuscript/
+references/
+manuscript.Rmd
+manuscript.docx
+old Manuscript.docx
+pando.Rmd

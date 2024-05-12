@@ -468,6 +468,95 @@ $(TAX_HAB_ITS) : code/split_taxonomy.R\
 		$$(subst _taxonomy_table.txt,_asv.txt,$$@)
 	code/split_taxonomy.R $(FINAL_ITS_TAX) $(subst _taxonomy_table.txt,_asv.txt,$@) $@
 
+#### Rarefaction curves ####
+
+# Generate 16S rarefaction curves
+RARECURVE_16S=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_16S))
+
+$(RARECURVE_16S) : code/get_rarefaction_curves.R\
+		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
+
+# Generate ITS rarefaction curves
+RARECURVE_ITS=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_ITS))
+
+$(RARECURVE_ITS) : code/get_rarefaction_curves.R\
+		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
+	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
+
+# Make rarefaction curve figures
+RARECURVE_FIG=results/rarefaction_curves_fig.rds
+
+$(RARECURVE_FIG) : code/make_rarefaction_curve_plots.R\
+		$$(MET_HAB_16S)\
+		$$(MET_HAB_ITS)\
+		$$(RARECURVE_16S)\
+		$$(RARECURVE_ITS)
+	code/make_rarefaction_curve_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS) $@
+
+# Save pdf of rarefaction curve figures
+results/rarefaction_curves_fig.pdf : code/save_figure.R\
+		$$(subst .pdf,.rds,$$@)
+	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
+
+#### Total sequence counts by sample ####
+
+# Get sequence totals
+SAMPLE_SEQ_TOTAL=$(subst _asv.txt,_sample_total.txt,$(ASV_HAB_16S))\
+$(subst _asv.txt,_sample_total.txt,$(ASV_HAB_ITS))
+
+$(SAMPLE_SEQ_TOTAL) : code/get_sample_sequence_totals.R\
+		$$(subst _sample_total.txt,_asv.txt,$$@)
+	code/get_sample_sequence_totals.R $(subst _sample_total.txt,_asv.txt,$@) $@
+
+# Make sequence total figures
+SAMPLE_SEQ_TOTAL_FIG=results/sample_sequence_totals_fig.rds
+
+$(SAMPLE_SEQ_TOTAL_FIG) : code/make_sample_sequence_total_plots.R\
+		$$(MET_HAB_16S)\
+		$$(MET_HAB_ITS)\
+		$$(SAMPLE_SEQ_TOTAL)
+	code/make_sample_sequence_total_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(SAMPLE_SEQ_TOTAL) $@
+
+# Save pdf of sequence total figures
+results/sample_sequence_totals_fig.pdf : code/save_figure.R\
+		$$(subst .pdf,.rds,$$@)
+	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
+
+#### Subsample tables ####
+
+# Subsample with ranked scaling (SRS)
+ASV_SUB=$(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_16S))\
+$(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_ITS))
+
+$(ASV_SUB) : code/get_sub_asv.R\
+		$$(subst _sub_asv.txt,_asv.txt,$$@)
+	code/get_sub_asv.R $(subst _sub_asv.txt,_asv.txt,$@) $@
+
+# Metadata
+METADATA_SUB=$(subst _sub_asv.txt,_sub_metadata.txt,$(ASV_SUB))
+
+$(METADATA_SUB) : code/get_sub_metadata.R\
+		$$(subst _sub_metadata.txt,_sub_asv.txt,$$@)\
+		$$(subst _sub_metadata.txt,_metadata.txt,$$@)
+	code/get_sub_metadata.R $(subst _sub_metadata.txt,_sub_asv.txt,$@) $(subst _sub_metadata.txt,_metadata.txt,$@) $@
+
+# Representative sequences
+REPSEQ_SUB=$(subst _sub_asv.txt,_sub_representative_sequences.fasta,$(ASV_SUB))
+
+$(REPSEQ_SUB) : code/get_sub_repseqs.R\
+		$$(subst _sub_representative_sequences.fasta,_sub_asv.txt,$$@)\
+		$$(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$$@)
+	code/get_sub_repseqs.R $(subst _sub_representative_sequences.fasta,_sub_asv.txt,$@) $(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$@) $@
+
+# Metadata
+TAX_SUB=$(subst _sub_asv.txt,_sub_taxonomy_table.txt,$(ASV_SUB))
+
+$(TAX_SUB) : code/get_sub_taxonomy.R\
+		$$(subst _sub_taxonomy_table.txt,_sub_asv.txt,$$@)\
+		$$(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$$@)
+	code/get_sub_taxonomy.R $(subst _sub_taxonomy_table.txt,_sub_asv.txt,$@) $(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$@) $@
+
 asv : $(METADATA_16S) $(METADATA_ITS) $(METAB)\
 $(TREE_AGE) $(TREE_AGE_SITE)\
 $(PS_16S_UNTRIMMED) $(PS_16S_TRIMMED)\
@@ -480,248 +569,184 @@ $(FINAL_16S_SUM) $(FINAL_ITS_SUM)\
 $(ASV_HAB_16S) $(ASV_HAB_ITS)\
 $(MET_HAB_16S) $(MET_HAB_ITS)\
 $(REPSEQ_HAB_16S) $(REPSEQ_HAB_ITS)\
-$(TAX_HAB_16S) $(TAX_HAB_ITS)
-
-# #### Rarefaction curves ####
-
-# # Generate 16S rarefaction curves
-# RARECURVE_16S=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_16S))
-
-# $(RARECURVE_16S) : code/get_rarefaction_curves.R\
-# 		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
-# 	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
-
-# # Generate ITS rarefaction curves
-# RARECURVE_ITS=$(subst _asv.txt,_rarefaction_curves.txt,$(ASV_HAB_ITS))
-
-# $(RARECURVE_ITS) : code/get_rarefaction_curves.R\
-# 		$$(subst _rarefaction_curves.txt,_asv.txt,$$@)
-# 	code/get_rarefaction_curves.R $(subst _rarefaction_curves.txt,_asv.txt,$@) $@
-
-# # Make rarefaction curve figures
-# RARECURVE_FIG=results/rarefaction_curves_fig.rds
-
-# $(RARECURVE_FIG) : code/make_rarefaction_curve_plots.R\
-# 		$$(MET_HAB_16S)\
-# 		$$(MET_HAB_ITS)\
-# 		$$(RARECURVE_16S)\
-# 		$$(RARECURVE_ITS)
-# 	code/make_rarefaction_curve_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS) $@
-
-# # Save pdf of rarefaction curve figures
-# results/rarefaction_curves_fig.pdf : code/save_figure.R\
-# 		$$(subst .pdf,.rds,$$@)
-# 	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
-
-# #### Total sequence counts by sample ####
-
-# # Get sequence totals
-# SAMPLE_SEQ_TOTAL=$(subst _asv.txt,_sample_total.txt,$(ASV_HAB_16S))\
-# $(subst _asv.txt,_sample_total.txt,$(ASV_HAB_ITS))
-
-# $(SAMPLE_SEQ_TOTAL) : code/get_sample_sequence_totals.R\
-# 		$$(subst _sample_total.txt,_asv.txt,$$@)
-# 	code/get_sample_sequence_totals.R $(subst _sample_total.txt,_asv.txt,$@) $@
-
-# # Make sequence total figures
-# SAMPLE_SEQ_TOTAL_FIG=results/sample_sequence_totals_fig.rds
-
-# $(SAMPLE_SEQ_TOTAL_FIG) : code/make_sample_sequence_total_plots.R\
-# 		$$(MET_HAB_16S)\
-# 		$$(MET_HAB_ITS)\
-# 		$$(SAMPLE_SEQ_TOTAL)
-# 	code/make_sample_sequence_total_plots.R $(MET_HAB_16S) $(MET_HAB_ITS) $(SAMPLE_SEQ_TOTAL) $@
-
-# # Save pdf of sequence total figures
-# results/sample_sequence_totals_fig.pdf : code/save_figure.R\
-# 		$$(subst .pdf,.rds,$$@)
-# 	code/save_figure.R $(subst .pdf,.rds,$@) "pdf" "NULL" "6.5" "8" "in" $@
-
-# #### Subsample tables ####
-
-# # Subsample with ranked scaling (SRS)
-# ASV_SUB=$(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_16S))\
-# $(subst _asv.txt,_sub_asv.txt,$(ASV_HAB_ITS))
-
-# $(ASV_SUB) : code/get_sub_asv.R\
-# 		$$(subst _sub_asv.txt,_asv.txt,$$@)
-# 	code/get_sub_asv.R $(subst _sub_asv.txt,_asv.txt,$@) $@
-
-# # Metadata
-# METADATA_SUB=$(subst _sub_asv.txt,_sub_metadata.txt,$(ASV_SUB))
-
-# $(METADATA_SUB) : code/get_sub_metadata.R\
-# 		$$(subst _sub_metadata.txt,_sub_asv.txt,$$@)\
-# 		$$(subst _sub_metadata.txt,_metadata.txt,$$@)
-# 	code/get_sub_metadata.R $(subst _sub_metadata.txt,_sub_asv.txt,$@) $(subst _sub_metadata.txt,_metadata.txt,$@) $@
-
-# # Representative sequences
-# REPSEQ_SUB=$(subst _sub_asv.txt,_sub_representative_sequences.fasta,$(ASV_SUB))
-
-# $(REPSEQ_SUB) : code/get_sub_repseqs.R\
-# 		$$(subst _sub_representative_sequences.fasta,_sub_asv.txt,$$@)\
-# 		$$(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$$@)
-# 	code/get_sub_repseqs.R $(subst _sub_representative_sequences.fasta,_sub_asv.txt,$@) $(subst _sub_representative_sequences.fasta,_representative_sequences.fasta,$@) $@
-
-# # Metadata
-# TAX_SUB=$(subst _sub_asv.txt,_sub_taxonomy_table.txt,$(ASV_SUB))
-
-# $(TAX_SUB) : code/get_sub_taxonomy.R\
-# 		$$(subst _sub_taxonomy_table.txt,_sub_asv.txt,$$@)\
-# 		$$(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$$@)
-# 	code/get_sub_taxonomy.R $(subst _sub_taxonomy_table.txt,_sub_asv.txt,$@) $(subst _sub_taxonomy_table.txt,_taxonomy_table.txt,$@) $@
-
-# subsample : $(ASV_HAB_16S) $(ASV_HAB_ITS)\
-# $(MET_HAB_16S) $(MET_HAB_ITS) $(REPSEQ_HAB_16S) $(REPSEQ_HAB_ITS)\
-# $(TAX_HAB_16S) $(TAX_HAB_ITS) $(RARECURVE_16S) $(RARECURVE_ITS)\
-# $(RARECURVE_FIG) results/rarefaction_curves_fig.pdf\
-# $(SAMPLE_SEQ_TOTAL) $(SAMPLE_SEQ_TOTAL_FIG) results/sample_sequence_totals_fig.pdf\
-# $(ASV_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
+$(TAX_HAB_16S) $(TAX_HAB_ITS)\
+$(RARECURVE_16S) $(RARECURVE_ITS) $(RARECURVE_FIG)\
+results/rarefaction_curves_fig.pdf\
+$(SAMPLE_SEQ_TOTAL) $(SAMPLE_SEQ_TOTAL_FIG)\
+results/sample_sequence_totals_fig.pdf\
+$(ASV_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
 
 #### 16S and ITS dbRDA ####
 
-# # Run dbRDA
-# DBRDA=$(subst _sub_asv.txt,_dbrda.rds,$(subst /asv_processed/,/dbrda/,$(ASV_SUB)))
+# Run dbRDA
+DBRDA=$(subst _sub_asv.txt,_dbrda.rds,$(subst /asv_processed/,/dbrda/,$(ASV_SUB)))
 
-# $(DBRDA) : code/run_dbrda.R\
-# 		$$(subst _dbrda.rds,_sub_asv.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
-# 		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
-# 		$$(TREE_AGE_SITE)
-# 	code/run_dbrda.R $(subst _dbrda.rds,_sub_asv.txt,$(subst /dbrda/,/asv_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+$(DBRDA) : code/run_dbrda.R\
+		$$(subst _dbrda.rds,_sub_asv.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
+		$$(subst _dbrda.rds,_sub_metadata.txt,$$(subst /dbrda/,/asv_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/run_dbrda.R $(subst _dbrda.rds,_sub_asv.txt,$(subst /dbrda/,/asv_processed/,$@)) $(subst _dbrda.rds,_sub_metadata.txt,$(subst /dbrda/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
-# # Run dbRDA ANOVA
-# DBRDA_ANOVA=$(subst _dbrda.rds,_dbrda_anova.txt,$(DBRDA))
+# Run dbRDA ANOVA
+DBRDA_ANOVA=$(subst _dbrda.rds,_dbrda_anova.txt,$(DBRDA))
 
-# $(DBRDA_ANOVA) : code/run_dbrda_anova.R\
-# 		$$(subst _dbrda_anova.txt,_dbrda.rds,$$@)
-# 	code/run_dbrda_anova.R $(subst _dbrda_anova.txt,_dbrda.rds,$@) $@
+$(DBRDA_ANOVA) : code/run_dbrda_anova.R\
+		$$(subst _dbrda_anova.txt,_dbrda.rds,$$@)
+	code/run_dbrda_anova.R $(subst _dbrda_anova.txt,_dbrda.rds,$@) $@
 
-# #### Metabolites dbRDA ####
+# Make dbRDA figure
+results/dbrda_fig.rds : code/make_dbrda_fig.R\
+		$$(DBRDA)\
+		$$(DBRDA_ANOVA)\
+		$$(METADATA_SUB)\
+		$$(TREE_AGE_SITE)
+	code/make_dbrda_fig.R $(DBRDA) $(DBRDA_ANOVA) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
-# # Run metabolite dbRDA
+# Save figure
+results/Fig1.png : code/save_figure.R\
+		results/dbrda_fig.rds
+	code/save_figure.R results/dbrda_fig.rds "png" "300" "6.5" "8" "in" $@
+
+#### Metabolites dbRDA ####
+
+# Run metabolite dbRDA
 # data/processed/dbrda/metabolite_dbrda.rds : code/run_dbrda_metabolites.R\
 # 		$$(METAB)\
 # 		$$(METADATA_SUB)\
 # 		$$(TREE_AGE_SITE)
 # 	code/run_dbrda_metabolites.R $(METAB) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
-# # Run dbRDA ANOVA
-# results/metabolite_dbrda_anova.txt : code/run_dbrda_anova.R\
-# 		data/processed/dbrda/metabolite_dbrda.rds
-# 	code/run_dbrda_anova.R data/processed/dbrda/metabolite_dbrda.rds $@
+# Run dbRDA ANOVA
+results/metabolite_dbrda_anova.txt : code/run_dbrda_anova.R\
+		data/processed/dbrda/metabolite_dbrda.rds
+	code/run_dbrda_anova.R data/processed/dbrda/metabolite_dbrda.rds $@
 
-# dbrda : $(DBRDA) $(DBRDA_ANOVA) data/processed/dbrda/metabolite_dbrda.rds\
-# results/metabolite_dbrda_anova.txt
+# Make dbRDA figure
+results/metab_dbrda_fig.rds : code/make_dbrda_fig.R\
+		data/processed/dbrda/metabolite_dbrda.rds\
+		results/metabolite_dbrda_anova.txt\
+		$$(METADATA_SUB)\
+		$$(TREE_AGE_SITE)
+	code/make_dbrda_fig.R $(DBRDA) $(DBRDA_ANOVA) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
-# #### 16S and ITS TITAN2 ####
+# # Save figure
+# results/Fig1.png : code/save_figure.R\
+# 		results/dbrda_fig.rds
+# 	code/save_figure.R results/dbrda_fig.rds "png" "300" "6.5" "8" "in" $@
 
-# # Prepare 16S and ITS TITAN2 input data
-# TITAN_IN=$(subst _sub_asv.txt,_titan_input.rds,$(subst /asv_processed/,/titan/,$(ASV_SUB)))
 
-# $(TITAN_IN) : code/get_titan_input.R\
-# 		$$(subst _titan_input.rds,_sub_asv.txt,$$(subst /titan/,/asv_processed/,$$@))\
-# 		$$(subst _titan_input.rds,_sub_metadata.txt,$$(subst /titan/,/asv_processed/,$$@))\
-# 		$$(TREE_AGE_SITE)
-# 	code/get_titan_input.R $(subst _titan_input.rds,_sub_asv.txt,$(subst /titan/,/asv_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+dbrda : $(DBRDA) $(DBRDA_ANOVA) data/processed/dbrda/metabolite_dbrda.rds\
+results/metabolite_dbrda_anova.txt results/dbrda_fig.rds results/Fig1.png
+
+#### 16S and ITS TITAN2 ####
+
+# Prepare 16S and ITS TITAN2 input data
+TITAN_IN=$(subst _sub_asv.txt,_titan_input.rds,$(subst /asv_processed/,/titan/,$(ASV_SUB)))
+
+$(TITAN_IN) : code/get_titan_input.R\
+		$$(subst _titan_input.rds,_sub_asv.txt,$$(subst /titan/,/asv_processed/,$$@))\
+		$$(subst _titan_input.rds,_sub_metadata.txt,$$(subst /titan/,/asv_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/get_titan_input.R $(subst _titan_input.rds,_sub_asv.txt,$(subst /titan/,/asv_processed/,$@)) $(subst _titan_input.rds,_sub_metadata.txt,$(subst /titan/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_60_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/60/,$(TITAN_IN)))
+TITAN_60_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/60/,$(TITAN_IN)))
 
 # $(TITAN_60_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/60/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/60/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_65_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/65/,$(TITAN_IN)))
+TITAN_65_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/65/,$(TITAN_IN)))
 
 # $(TITAN_65_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/65/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/65/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_70_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/70/,$(TITAN_IN)))
+TITAN_70_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/70/,$(TITAN_IN)))
 
 # $(TITAN_70_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/70/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/70/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_75_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/75/,$(TITAN_IN)))
+TITAN_75_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/75/,$(TITAN_IN)))
 
 # $(TITAN_75_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/75/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/75/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_80_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/80/,$(TITAN_IN)))
+TITAN_80_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/80/,$(TITAN_IN)))
 
 # $(TITAN_80_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/80/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/80/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_85_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/85/,$(TITAN_IN)))
+TITAN_85_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/85/,$(TITAN_IN)))
 
 # $(TITAN_85_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/85/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/85/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_90_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/90/,$(TITAN_IN)))
+TITAN_90_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/90/,$(TITAN_IN)))
 
 # $(TITAN_90_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/90/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/90/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_95_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/95/,$(TITAN_IN)))
+TITAN_95_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/95/,$(TITAN_IN)))
 
 # $(TITAN_95_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/95/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/95/,/titan/,$@)) $@
 
 # # Run 16S and ITS TITAN2
-# TITAN_99_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/99/,$(TITAN_IN)))
+TITAN_99_OUT=$(subst _titan_input.rds,_titan_output.rds,$(subst /titan/,/titan/99/,$(TITAN_IN)))
 
 # $(TITAN_99_OUT) : code/run_titan.R\
 # 		$$(subst _titan_output.rds,_titan_input.rds,$$(subst /titan/99/,/titan/,$$@))
 # 	code/run_titan.R $(subst _titan_output.rds,_titan_input.rds,$(subst /titan/99/,/titan/,$@)) $@
 
-# # TITAN2 fsumz
-# data/processed/titan/titan_fsumz.txt : code/get_titan_fsumz.R\
-# 		$$(TITAN_60_OUT)\
-# 		$$(TITAN_65_OUT)\
-# 		$$(TITAN_70_OUT)\
-# 		$$(TITAN_75_OUT)\
-# 		$$(TITAN_80_OUT)\
-# 		$$(TITAN_85_OUT)\
-# 		$$(TITAN_90_OUT)\
-# 		$$(TITAN_95_OUT)
-# 	code/get_titan_fsumz.R $(TITAN_60_OUT) $(TITAN_65_OUT) $(TITAN_70_OUT) $(TITAN_75_OUT) $(TITAN_80_OUT) $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $@
+# TITAN2 fsumz
+data/processed/titan/titan_fsumz.txt : code/get_titan_fsumz.R\
+		$$(TITAN_60_OUT)\
+		$$(TITAN_65_OUT)\
+		$$(TITAN_70_OUT)\
+		$$(TITAN_75_OUT)\
+		$$(TITAN_80_OUT)\
+		$$(TITAN_85_OUT)\
+		$$(TITAN_90_OUT)\
+		$$(TITAN_95_OUT)
+	code/get_titan_fsumz.R $(TITAN_60_OUT) $(TITAN_65_OUT) $(TITAN_70_OUT) $(TITAN_75_OUT) $(TITAN_80_OUT) $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $@
 
-# # TITAN2 Bartlett test
-# results/titan_bartlett.txt : code/run_titan_bartlett.R\
-# 		data/processed/titan/titan_fsumz.txt
-# 	code/run_titan_bartlett.R data/processed/titan/titan_fsumz.txt $@
+# TITAN2 Bartlett test
+results/titan_bartlett.txt : code/run_titan_bartlett.R\
+		data/processed/titan/titan_fsumz.txt
+	code/run_titan_bartlett.R data/processed/titan/titan_fsumz.txt $@
 
-# # TITAN2 paired t-test
-# results/titan_paired_ttest.txt : code/run_titan_paired_ttest.R\
-# 		data/processed/titan/titan_fsumz.txt
-# 	code/run_titan_paired_ttest.R data/processed/titan/titan_fsumz.txt $@
+# TITAN2 paired t-test
+results/titan_paired_ttest.txt : code/run_titan_paired_ttest.R\
+		data/processed/titan/titan_fsumz.txt
+	code/run_titan_paired_ttest.R data/processed/titan/titan_fsumz.txt $@
 
-# # Make fsumz figure
-# results/titan_fsumz_fig.rds : code/make_titan_fsumz_fig.R\
-# 		data/processed/titan/titan_fsumz.txt\
-# 		results/titan_paired_ttest.txt
-# 	code/make_titan_fsumz_fig.R data/processed/titan/titan_fsumz.txt results/titan_paired_ttest.txt $@
+# Make fsumz figure
+results/titan_fsumz_fig.rds : code/make_titan_fsumz_fig.R\
+		data/processed/titan/titan_fsumz.txt\
+		results/titan_paired_ttest.txt
+	code/make_titan_fsumz_fig.R data/processed/titan/titan_fsumz.txt results/titan_paired_ttest.txt $@
 
-# # Save fsumz figure as a pdf
-# results/titan_fsumz_fig.pdf : code/save_figure.R\
-# 		results/titan_fsumz_fig.rds
-# 	code/save_figure.R results/titan_fsumz_fig.rds "pdf" "NULL" "6.5" "7.5" "in" $@
+# Save fsumz figure as a png
+results/Fig2.png : code/save_figure.R\
+		results/titan_fsumz_fig.rds
+	code/save_figure.R results/titan_fsumz_fig.rds "png" "NULL" "6.5" "7.5" "in" $@
 
 # #### Metabolite TITAN2 ####
 
@@ -739,9 +764,10 @@ $(TAX_HAB_16S) $(TAX_HAB_ITS)
 # 	code/run_titan_metabolites.R data/processed/titan/metabolite_titan_input.rds $@
 
 # titan2 : $(TITAN_IN) $(TITAN_60_OUT) $(TITAN_65_OUT) $(TITAN_70_OUT) $(TITAN_75_OUT) $(TITAN_80_OUT)\
-# $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $(TITAN_99_OUT) #data/processed/titan/titan_fsumz.txt\
-# data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
-# results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/titan_fsumz_fig.pdf\
+# $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $(TITAN_99_OUT)
+titan2: data/processed/titan/titan_fsumz.txt\
+data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
+results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/Fig2.png
 # data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
 
 # titan2b : data/processed/titan/titan_fsumz.txt results/titan_bartlett.txt\
@@ -805,3 +831,13 @@ $(TAX_HAB_16S) $(TAX_HAB_ITS)
 
 # spieceasi : data/processed/spieceasi/comb_16s_its_metab.txt\
 # $(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_METAB_IN)
+
+#### Render final report ####
+
+# Render with rmarkdown library
+pando.html : code/render_report.R\
+		results/dbrda_fig.rds\
+		pando.Rmd
+	code/render_report.R results/dbrda_fig.rds pando.Rmd $@
+
+manuscript : pando.html
