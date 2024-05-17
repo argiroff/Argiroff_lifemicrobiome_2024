@@ -835,9 +835,8 @@ results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/Fig2.png
 #### Render final report ####
 
 # Render with rmarkdown library
-pando.html : code/render_report.R\
-		results/dbrda_fig.rds\
-		pando.Rmd
-	code/render_report.R results/dbrda_fig.rds pando.Rmd $@
+manuscript.docx : code/render_report.R\
+		manuscript.Rmd
+	code/render_report.R manuscript.Rmd $@
 
-manuscript : pando.html
+manuscript : manuscript.docx
