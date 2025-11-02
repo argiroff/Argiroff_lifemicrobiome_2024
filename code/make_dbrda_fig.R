@@ -24,52 +24,52 @@ asv_dbrda <- clargs[1:6] %>%
 
 #### Function to format dbRDA ANOVAs ####
 
-format_dbRDA_aov <- function(x) {
+# format_dbRDA_aov <- function(x) {
   
-  aov_results <- x %>%
-    select(variable, `Pr(>F)`) %>%
-    filter(variable != "Residual") %>%
+#   aov_results <- x %>%
+#     select(variable, `Pr(>F)`) %>%
+#     filter(variable != "Residual") %>%
     
-    mutate(
+#     mutate(
       
-      variable = ifelse(
-        variable == "tree_age_site",
-        "Age",
-        variable
-      ),
+#       variable = ifelse(
+#         variable == "tree_age_site",
+#         "Age",
+#         variable
+#       ),
       
-      variable = ifelse(
-        variable == "site",
-        "Stand",
-        variable
-      ),
+#       variable = ifelse(
+#         variable == "site",
+#         "Stand",
+#         variable
+#       ),
       
-      variable = ifelse(
-        variable == "tree_age_site:site",
-        "Age%*%stand",
-        variable
-      ),
+#       variable = ifelse(
+#         variable == "tree_age_site:site",
+#         "Age%*%stand",
+#         variable
+#       ),
       
-      `Pr(>F)` = ifelse(
-        `Pr(>F)` == 0.001,
-        "italic(P)<0.001",
-        paste("italic(P)=", `Pr(>F)`, sep = "")
-      )
+#       `Pr(>F)` = ifelse(
+#         `Pr(>F)` == 0.001,
+#         "italic(P)<0.001",
+#         paste("italic(P)=", `Pr(>F)`, sep = "")
+#       )
       
-    ) %>%
+#     ) %>%
     
-    # Combine
-    unite(sig_label, variable, `Pr(>F)`, sep = "~") %>%
-    pull(sig_label)
+#     # Combine
+#     unite(sig_label, variable, `Pr(>F)`, sep = "~") %>%
+#     pull(sig_label)
   
-  # Add new lines
-  aov_out <- tibble(
-    sig_label = paste(aov_results, collapse = "\n")
-  )
+#   # Add new lines
+#   aov_out <- tibble(
+#     sig_label = paste(aov_results, collapse = "\n")
+#   )
   
-  return(aov_out)
+#   return(aov_out)
   
-}
+# }
 
 # Read in dbRDA ANOVAs
 asv_aov <- clargs[7:12] %>%
@@ -84,6 +84,8 @@ asv_aov <- clargs[7:12] %>%
   group_by(hab) %>%
   group_split(.) %>%
   map(., .f = ungroup)
+
+print(asv_aov)
 
 # Read in tree age
 tree_age <- read_rds(clargs[19]) %>%
@@ -105,7 +107,7 @@ asv_dbrda_scores <- map2(
 asv_dbrda_figs <- pmap(
   list(
     asv_dbrda_scores,
-    # asv_aov,
+    asv_aov,
     c("(a)", "(c)", "(e)", "(b)", "(d)", "(f)")
   ),
   .f = plot_dbRDA

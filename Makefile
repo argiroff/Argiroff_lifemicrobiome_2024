@@ -9,7 +9,7 @@ print-% :
 
 # #### Use R to make QIIME2 manifest files ####
 
-# # 16S
+# 16S
 PATH_16S=$(wildcard data/qiime2/16S/*)
 MANIFEST_16S_OUT=$(foreach path,$(PATH_16S),$(path)/manifest.txt)
 

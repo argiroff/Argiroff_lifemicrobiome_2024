@@ -372,11 +372,13 @@ get_dbRDA_scores <- function(x, env_tab) {
 
 plot_dbRDA <- function(
     dbrda.ord,
-    # dbrda.aov,
+    dbrda.aov,
     plot.title
 ) {
   
   tmp1 <- ggplot() +
+
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.2))) +
     
     geom_vline(
       xintercept = 0,
@@ -408,12 +410,18 @@ plot_dbRDA <- function(
       option = "plasma"
     ) +
     
-    # geom_text(
-    #   data = dbrda.aov,
-    #   aes(x = xpos, y = ypos, label = sig_label),
-    #   parse = TRUE,
-    #   size = 3
-    # ) +
+    geom_text(
+      data = dbrda.aov,
+      aes(
+        x = Inf,
+        y = Inf,
+        label = sig_label
+      ),
+      hjust = 1.025,
+      vjust = 1.5,
+      parse = TRUE,
+      size = 3
+    ) +
     
     labs(
       title = plot.title, 
@@ -451,6 +459,7 @@ plot_dbRDA <- function(
 
 #### Function to format dbRDA ANOVAs ####
 
+# Format dbRDA ANOVA
 format_dbRDA_aov <- function(x) {
   
   aov_results <- x %>%
@@ -458,41 +467,38 @@ format_dbRDA_aov <- function(x) {
     filter(variable != "Residual") %>%
     
     mutate(
-      
-      variable = ifelse(
-        variable == "tree_age_site",
-        "Age",
-        variable
+      variable = case_when(
+        variable == "tree_age_site" ~ "italic('P'['age'])",
+        variable == "site" ~ "italic('P'['stand'])",
+        variable == "tree_age_site:site" ~ "italic('P'['age'%*%'stand'])",
+        TRUE ~ variable
       ),
       
-      variable = ifelse(
-        variable == "site",
-        "Stand",
-        variable
-      ),
-      
-      variable = ifelse(
-        variable == "tree_age_site:site",
-        "Age%*%stand",
-        variable
-      ),
-      
-      `Pr(>F)` = ifelse(
-        `Pr(>F)` == 0.001,
-        "italic(P)<0.001",
-        paste("italic(P)=", `Pr(>F)`, sep = "")
+      `Pr(>F)` = case_when(
+        `Pr(>F)` == 0.001 ~ "<0.001",
+        TRUE ~ paste0("==", `Pr(>F)`)
       )
-      
     ) %>%
     
     # Combine
-    unite(sig_label, variable, `Pr(>F)`, sep = "~") %>%
+    unite(sig_label, variable, `Pr(>F)`, sep = "") %>%
     pull(sig_label)
-  
-  # Add new lines
+
   aov_out <- tibble(
-    sig_label = paste(aov_results, collapse = "\n")
+    sig_label = paste(aov_results, collapse = "*';'~")
   )
+
+  # aov_out <- tibble(
+  #   sig_label = paste0(
+  #     "atop(textstyle(",
+  #     aov_results[1],
+  #     "),atop(textstyle(",
+  #     aov_results[2],
+  #     "),textstyle(",
+  #     aov_results[3],
+  #     ")))"
+  #   )
+  # )
   
   return(aov_out)
   
