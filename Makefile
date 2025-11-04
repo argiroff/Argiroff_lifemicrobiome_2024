@@ -578,6 +578,16 @@ $(ASV_SUB) $(METADATA_SUB) $(REPSEQ_SUB) $(TAX_SUB)
 
 #### Alpha diversity ####
 
+# Calculate Hill numbers
+HILL_DIV=$(subst _sub_asv.txt,_hill_div.txt,$(subst /asv_processed/,/hill_div/,$(ASV_SUB)))
+
+$(HILL_DIV) : code/calculate_hill_div.R\
+		$$(subst _hill_div.txt,_sub_asv.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
+		$$(subst _hill_div.txt,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/calculate_hill_div.R $(subst _hill_div.txt,_sub_asv.txt,$(subst /hill_div/,/asv_processed/,$@)) $(subst _hill_div.txt,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+
+hill_div : $(HILL_DIV)
 
 #### 16S and ITS dbRDA ####
 
@@ -606,7 +616,7 @@ results/dbrda_fig.rds : code/make_dbrda_fig.R\
 	code/make_dbrda_fig.R $(DBRDA) $(DBRDA_ANOVA) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
 # Save figure
-results/Fig1.png : code/save_figure.R\
+results/Fig2.png : code/save_figure.R\
 		results/dbrda_fig.rds
 	code/save_figure.R results/dbrda_fig.rds "png" "300" "6.5" "8" "in" $@
 
@@ -633,13 +643,12 @@ results/metab_dbrda_fig.rds : code/make_dbrda_fig.R\
 	code/make_dbrda_fig.R $(DBRDA) $(DBRDA_ANOVA) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
 # # Save figure
-# results/Fig1.png : code/save_figure.R\
+# results/Fig2.png : code/save_figure.R\
 # 		results/dbrda_fig.rds
 # 	code/save_figure.R results/dbrda_fig.rds "png" "300" "6.5" "8" "in" $@
 
-
 dbrda : $(DBRDA) $(DBRDA_ANOVA) data/processed/dbrda/metabolite_dbrda.rds\
-results/metabolite_dbrda_anova.txt results/dbrda_fig.rds results/Fig1.png
+results/metabolite_dbrda_anova.txt results/dbrda_fig.rds results/Fig2.png
 
 #### 16S and ITS TITAN2 ####
 
@@ -744,7 +753,7 @@ results/titan_fsumz_fig.rds : code/make_titan_fsumz_fig.R\
 	code/make_titan_fsumz_fig.R data/processed/titan/titan_fsumz.txt results/titan_paired_ttest.txt $@
 
 # Save fsumz figure as a png
-results/Fig2.png : code/save_figure.R\
+results/Fig3.png : code/save_figure.R\
 		results/titan_fsumz_fig.rds
 	code/save_figure.R results/titan_fsumz_fig.rds "png" "NULL" "6.5" "7.5" "in" $@
 
@@ -767,7 +776,7 @@ results/Fig2.png : code/save_figure.R\
 # $(TITAN_85_OUT) $(TITAN_90_OUT) $(TITAN_95_OUT) $(TITAN_99_OUT)
 titan2: data/processed/titan/titan_fsumz.txt\
 data/processed/titan/titan_asv.txt results/titan_bartlett.txt\
-results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/Fig2.png
+results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/Fig3.png
 # data/processed/titan/metabolite_titan_input.rds data/processed/titan/metabolite_titan_output.rds
 
 # titan2b : data/processed/titan/titan_fsumz.txt results/titan_bartlett.txt\
