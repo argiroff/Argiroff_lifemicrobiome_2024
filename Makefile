@@ -587,7 +587,14 @@ $(HILL_DIV) : code/calculate_hill_div.R\
 		$$(TREE_AGE_SITE)
 	code/calculate_hill_div.R $(subst _hill_div.txt,_sub_asv.txt,$(subst /hill_div/,/asv_processed/,$@)) $(subst _hill_div.txt,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
-hill_div : $(HILL_DIV)
+# Run Hill LMM
+HILL_LM=$(subst _hill_div.txt,_hill_lm.rds,$(HILL_DIV))
+
+$(HILL_LM) : code/run_hill_lm.R\
+		$$(subst _hill_lm.rds,_hill_div.txt,$$@)
+	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $@
+
+hill_div : $(HILL_DIV) $(HILL_LM)
 
 #### 16S and ITS dbRDA ####
 

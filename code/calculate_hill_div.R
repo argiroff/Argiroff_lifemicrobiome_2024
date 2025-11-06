@@ -12,8 +12,6 @@
 
 clargs <- commandArgs(trailingOnly = TRUE)
 
-print(clargs)
-
 library(tidyverse)
 library(hillR)
 
