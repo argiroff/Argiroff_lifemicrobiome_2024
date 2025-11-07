@@ -35,13 +35,6 @@ sample_id_filter <- rownames(asv)
 # Metadata
 metadata <- read_tsv(clargs[2])
 
-# Add tree age data
-env <- read_rds(clargs[3]) %>%
-  pluck("age_df") %>%
-  inner_join(metadata, ., by = "tree_id") %>%
-  filter(sample_id %in% sample_id_filter) %>%
-  arrange(match(sample_id, rownames(asv)))
-
 # Run Hill diversity
 hill_div <- list(0, 1, 2) %>%
   set_names(., nm = paste0("hill", 0:2)) %>%
@@ -60,11 +53,10 @@ hill_div <- list(0, 1, 2) %>%
 
     }
   ) %>%
-  bind_rows(.id = "hill_index") %>%
-  inner_join(env, ., by = "sample_id")
+  bind_rows(.id = "hill_index")
 
 # Output directory
-out_path <- dirname(clargs[4])
+out_path <- dirname(clargs[3])
 if (!dir.exists(out_path)) {
   dir.create(out_path)
 }
@@ -72,5 +64,5 @@ if (!dir.exists(out_path)) {
 # Save
 write_tsv(
   hill_div,
-  clargs[4]
+  clargs[3]
 )

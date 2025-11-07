@@ -14,8 +14,17 @@ clargs <- commandArgs(trailingOnly = TRUE)
 library(tidyverse)
 library(emmeans)
 
+# Read in metadata
+metadata <- read_tsv(clargs[2])
+
+# Add tree age data
+env <- read_rds(clargs[3]) %>%
+  pluck("age_df") %>%
+  inner_join(metadata, ., by = "tree_id")
+
 # Prepare input data
 hill_div <- read_tsv(clargs[1]) %>%
+  inner_join(env, ., by = "sample_id") %>%
   mutate(site = factor(site, levels = c("A", "B", "D", "H"))) %>%
   group_by(hill_index) %>%
   group_split() %>%
@@ -66,8 +75,3 @@ hill_lm_slopes_pairs_summary <- map(
   hill_lm_slopes_pairs,
   .f = summary
 )
-
-
-
-
-print(hill_lm_slopes_pairs_summary)

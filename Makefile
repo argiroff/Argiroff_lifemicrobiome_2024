@@ -583,16 +583,20 @@ HILL_DIV=$(subst _sub_asv.txt,_hill_div.txt,$(subst /asv_processed/,/hill_div/,$
 
 $(HILL_DIV) : code/calculate_hill_div.R\
 		$$(subst _hill_div.txt,_sub_asv.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
-		$$(subst _hill_div.txt,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
-		$$(TREE_AGE_SITE)
-	code/calculate_hill_div.R $(subst _hill_div.txt,_sub_asv.txt,$(subst /hill_div/,/asv_processed/,$@)) $(subst _hill_div.txt,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+		$$(subst _hill_div.txt,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))
+	code/calculate_hill_div.R $(subst _hill_div.txt,_sub_asv.txt,$(subst /hill_div/,/asv_processed/,$@)) $(subst _hill_div.txt,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $@
 
-# Run Hill LMM
+# Run Hill LM
 HILL_LM=$(subst _hill_div.txt,_hill_lm.rds,$(HILL_DIV))
 
 $(HILL_LM) : code/run_hill_lm.R\
-		$$(subst _hill_lm.rds,_hill_div.txt,$$@)
-	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $@
+		$$(subst _hill_lm.rds,_hill_div.txt,$$@)\
+		$$(subst _hill_lm.rds,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
+		$$(TREE_AGE_SITE)
+	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $(subst _hill_lm.rds,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# Make Hill diversity figure
+# results/hill_fig.rds : 
 
 hill_div : $(HILL_DIV) $(HILL_LM)
 
