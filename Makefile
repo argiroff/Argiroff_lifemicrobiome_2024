@@ -596,9 +596,19 @@ $(HILL_LM) : code/run_hill_lm.R\
 	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $(subst _hill_lm.rds,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
 
 # Make Hill diversity figure
-# results/hill_fig.rds : 
+results/hill_fig.rds : code/make_hill_fig.R\
+		$$(HILL_DIV)\
+		$$(HILL_LM)\
+		$$(METADATA_SUB)\
+		$$(TREE_AGE_SITE)
+	code/make_hill_fig.R $(HILL_DIV) $(HILL_LM) $(METADATA_SUB) $(TREE_AGE_SITE) $@
 
-hill_div : $(HILL_DIV) $(HILL_LM)
+# Save figure
+results/Fig1.png : code/save_figure.R\
+		results/hill_fig.rds
+	code/save_figure.R results/hill_fig.rds "png" "300" "6.5" "8" "in" $@
+
+hill_div : $(HILL_DIV) $(HILL_LM) results/hill_fig.rds #results/Fig1.png
 
 #### 16S and ITS dbRDA ####
 

@@ -7,7 +7,9 @@
 # notes : expects order of inputs, output
 #   expects input paths for 
 #   data/processed/<16S or ITS>/dbrda/<RE or RH or BS>_hill_div.txt
-#   and output data/processed/<16S or ITS>/dbrda/<RE or RH or BS>_hill_lmm.txt
+#   data/processed/<16S or ITS>/asv_processed/<RE or RH or BS>_sub_metadata.txt
+#   data/processed/environ/tree_age_site.rds
+#   and output data/processed/<16S or ITS>/dbrda/<RE or RH or BS>_hill_lm.rds
 
 clargs <- commandArgs(trailingOnly = TRUE)
 
@@ -64,7 +66,7 @@ hill_lm_slopes_summary <- map(
   }
 )
 
-# Slopes comparisons
+# Slopes comparisons with Tukey's adjustment
 hill_lm_slopes_pairs <- map(
   hill_lm_slopes,
   .f = pairs
@@ -74,4 +76,52 @@ hill_lm_slopes_pairs <- map(
 hill_lm_slopes_pairs_summary <- map(
   hill_lm_slopes_pairs,
   .f = summary
+)
+
+# Site means comparison
+hill_lm_sites <- map(
+  hill_lm,
+  .f = function(x) {
+    emmeans(x, "site")
+  }
+)
+
+# Site means comparison summary
+hill_lm_sites_summary <- map(
+  hill_lm_sites,
+  .f = function(x) {
+    summary(x, infer = c(TRUE, TRUE))
+  }
+)
+
+# Site means pairs
+hill_lm_sites_pairs <- map(
+  hill_lm_sites,
+  .f = pairs
+)
+
+# Site means pairs summary
+hill_lm_sites_pairs_summary <- map(
+  hill_lm_sites_pairs,
+  .f = summary
+)
+
+# Combine results
+hill_lm_list <- list(
+  hill_lm = hill_lm,
+  hill_lm_summary = hill_lm_summary,
+  hill_lm_slopes = hill_lm_slopes,
+  hill_lm_slopes_summary = hill_lm_slopes_summary,
+  hill_lm_slopes_pairs = hill_lm_slopes_pairs,
+  hill_lm_slopes_pairs_summary = hill_lm_slopes_pairs_summary,
+  hill_lm_sites = hill_lm_sites,
+  hill_lm_sites_summary = hill_lm_sites_summary,
+  hill_lm_sites_pairs = hill_lm_sites_pairs,
+  hill_lm_sites_pairs_summary = hill_lm_sites_pairs_summary
+)
+
+# Save
+write_rds(
+  hill_lm_list,
+  clargs[4]
 )
