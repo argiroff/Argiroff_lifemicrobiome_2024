@@ -85,8 +85,6 @@ asv_aov <- clargs[7:12] %>%
   group_split(.) %>%
   map(., .f = ungroup)
 
-print(asv_aov)
-
 # Read in tree age
 tree_age <- read_rds(clargs[19]) %>%
   pluck("age_df")

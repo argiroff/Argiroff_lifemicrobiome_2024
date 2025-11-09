@@ -606,9 +606,9 @@ results/hill_fig.rds : code/make_hill_fig.R\
 # Save figure
 results/Fig1.png : code/save_figure.R\
 		results/hill_fig.rds
-	code/save_figure.R results/hill_fig.rds "png" "300" "6.5" "8" "in" $@
+	code/save_figure.R results/hill_fig.rds "png" "300" "6.5" "8.5" "in" $@
 
-hill_div : $(HILL_DIV) $(HILL_LM) results/hill_fig.rds #results/Fig1.png
+hill_div : $(HILL_DIV) $(HILL_LM) results/hill_fig.rds results/Fig1.png
 
 #### 16S and ITS dbRDA ####
 
