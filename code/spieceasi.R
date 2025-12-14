@@ -26,7 +26,7 @@ ntwrk <- spiec.easi(
   method = "mb",
   nlambda = 50,
   lambda.min.ratio = 1e-3,
-  pulsar.params = list(thresh = 0.01, seed = 12345, ncores = 32)
+  pulsar.params = list(thresh = 0.01, seed = 12345, ncores = 4)
 )
 
 # Get matrix of edges and nodes

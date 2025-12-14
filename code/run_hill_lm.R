@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript --vanilla
 
-# name : run_hill_lmm.R
+# name : run_hill_lm.R
 # author: William Argiroff
 # inputs : .txt of Hill numbers
 # output : summarized LM

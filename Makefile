@@ -586,14 +586,28 @@ $(HILL_DIV) : code/calculate_hill_div.R\
 		$$(subst _hill_div.txt,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))
 	code/calculate_hill_div.R $(subst _hill_div.txt,_sub_asv.txt,$(subst /hill_div/,/asv_processed/,$@)) $(subst _hill_div.txt,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $@
 
-# Run Hill LM
-HILL_LM=$(subst _hill_div.txt,_hill_lm.rds,$(HILL_DIV))
+# Run Hill LMM
+HILL_LMM=$(subst _hill_div.txt,_hill_lmm.rds,$(HILL_DIV))
 
-$(HILL_LM) : code/run_hill_lm.R\
-		$$(subst _hill_lm.rds,_hill_div.txt,$$@)\
-		$$(subst _hill_lm.rds,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
+$(HILL_LMM) : code/run_hill_lmm.R\
+		$$(subst _hill_lmm.rds,_hill_div.txt,$$@)\
+		$$(subst _hill_lmm.rds,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
 		$$(TREE_AGE_SITE)
-	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $(subst _hill_lm.rds,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+	code/run_hill_lmm.R $(subst _hill_lmm.rds,_hill_div.txt,$@) $(subst _hill_lmm.rds,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# # Run Hill LM
+# HILL_LM=$(subst _hill_div.txt,_hill_lm.rds,$(HILL_DIV))
+
+# $(HILL_LM) : code/run_hill_lm.R\
+# 		$$(subst _hill_lm.rds,_hill_div.txt,$$@)\
+# 		$$(subst _hill_lm.rds,_sub_metadata.txt,$$(subst /hill_div/,/asv_processed/,$$@))\
+# 		$$(TREE_AGE_SITE)
+# 	code/run_hill_lm.R $(subst _hill_lm.rds,_hill_div.txt,$@) $(subst _hill_lm.rds,_sub_metadata.txt,$(subst /hill_div/,/asv_processed/,$@)) $(TREE_AGE_SITE) $@
+
+# # Hill LM table
+# hill_lm_table.rds : code/hill_lm_table.R\
+# 		$$(HILL_LM)
+# 	code/hill_lm_table.R $(HILL_LM) $@
 
 # Make Hill diversity figure
 results/hill_fig.rds : code/make_hill_fig.R\
@@ -608,7 +622,10 @@ results/Fig1.png : code/save_figure.R\
 		results/hill_fig.rds
 	code/save_figure.R results/hill_fig.rds "png" "300" "6.5" "8.5" "in" $@
 
-hill_div : $(HILL_DIV) $(HILL_LM) results/hill_fig.rds results/Fig1.png
+hill_div : $(HILL_DIV) $(HILL_LMM) results/hill_fig.rds\
+results/Fig1.png
+
+# hill_lm_table.rds
 
 #### 16S and ITS dbRDA ####
 
@@ -822,16 +839,47 @@ results/titan_paired_ttest.txt results/titan_fsumz_fig.rds results/Fig3.png
 
 # comp_metab : $(BC_DIST) results/comp_metab_mantel.txt
 
-# #### SPIEC-EASI input ####
+#### SPIEC-EASI input ####
 
-# # Combined 16S, ITS, metabolits table
-# data/processed/spieceasi/comb_16s_its_metab.txt : code/get_combined_asv_metab_table.R\
-# 		$$(FINAL_16S_META)\
-# 		$$(FINAL_ITS_META)\
-# 		$$(FINAL_16S_ASV)\
-# 		$$(FINAL_ITS_ASV)\
-# 		$$(METAB)
-# 	code/get_combined_asv_metab_table.R $(FINAL_16S_META) $(FINAL_ITS_META) $(FINAL_16S_ASV) $(FINAL_ITS_ASV) $(METAB) $@
+# Combined 16S, ITS, metabolits table
+data/processed/spieceasi/comb_16s_its_metab.txt : code/get_combined_asv_metab_table.R\
+		$$(FINAL_16S_META)\
+		$$(FINAL_ITS_META)\
+		$$(FINAL_16S_ASV)\
+		$$(FINAL_ITS_ASV)\
+		$$(METAB)
+	code/get_combined_asv_metab_table.R $(FINAL_16S_META) $(FINAL_ITS_META) $(FINAL_16S_ASV) $(FINAL_ITS_ASV) $(METAB) $@
+
+# Get input
+SPIECEASI_IN_NAMES=bs re rh
+
+SPIECEASI_IN_PATH=$(foreach path,$(SPIECEASI_IN_NAMES),data/processed/spieceasi/$(path))
+
+# 16S
+SPIECEASI_16S_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_16s_input.rds)
+
+$(SPIECEASI_16S_IN) : code/get_input_for_spieceasi.R\
+		data/processed/spieceasi/comb_16s_its_metab.txt
+	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
+
+# ITS inputs
+SPIECEASI_ITS_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_its_input.rds)
+
+$(SPIECEASI_ITS_IN) : code/get_input_for_spieceasi.R\
+		data/processed/spieceasi/comb_16s_its_metab.txt
+	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
+
+# Run SPIEC-EASI
+SPIECEASI_RESULTS=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_spieceasi_results.rds)
+
+$(SPIECEASI_RESULTS) : code/run_full_spieceasi.sh\
+		$$(subst _spieceasi_results.rds,_16s_input.rds,$$@)\
+		$$(subst _spieceasi_results.rds,_its_input.rds,$$@)\
+		$$(subst _spieceasi_results.rds,_metab_input.rds,$$@)
+	code/run_full_spieceasi.sh $(subst _spieceasi_results.rds,_16s_input.rds,$@) $(subst _spieceasi_results.rds,_its_input.rds,$@) $(subst _spieceasi_results.rds,_metab_input.rds,$@) $@
+
+network : data/processed/spieceasi/comb_16s_its_metab.txt\
+$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_RESULTS)
 
 # # Get input
 # SPIECEASI_IN_NAMES=bs re rh
