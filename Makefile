@@ -878,37 +878,24 @@ $(SPIECEASI_RESULTS) : code/run_full_spieceasi.sh\
 		$$(subst _spieceasi_results.rds,_metab_input.rds,$$@)
 	code/run_full_spieceasi.sh $(subst _spieceasi_results.rds,_16s_input.rds,$@) $(subst _spieceasi_results.rds,_its_input.rds,$@) $(subst _spieceasi_results.rds,_metab_input.rds,$@) $@
 
+# Convert networks to igraph objects
+SPIECEASI_IGRAPH=$(subst _results.rds,_igraph.rds,$(SPIECEASI_RESULTS))
+
+IGRAPH_16S_TAX := $(patsubst %spieceasi/bs_spieceasi_igraph.rds,%16S/asv_processed/BS_taxonomy_table.txt, \
+	$(patsubst %spieceasi/re_spieceasi_igraph.rds,%16S/asv_processed/RE_taxonomy_table.txt, \
+	$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%16S/asv_processed/RH_taxonomy_table.txt, \
+	$(IGRAPH_RESULTS))))
+
+$(SPIECEASI_IGRAPH) : code/convert_to_igraph.R\
+		$$(subst _igraph.rds,_results.rds,$$@)\
+		$$(patsubst %spieceasi/bs_spieceasi_igraph.rds,%16S/asv_processed/BS_taxonomy_table.txt,$$(patsubst %spieceasi/re_spieceasi_igraph.rds,%16S/asv_processed/RE_taxonomy_table.txt,$$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%16S/asv_processed/RH_taxonomy_table.txt, $$@)))\
+		$$(patsubst %spieceasi/bs_spieceasi_igraph.rds,%ITS/asv_processed/BS_taxonomy_table.txt,$$(patsubst %spieceasi/re_spieceasi_igraph.rds,%ITS/asv_processed/RE_taxonomy_table.txt,$$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%ITS/asv_processed/RH_taxonomy_table.txt, $$@)))\
+		$$(METAB)
+	code/convert_to_igraph.R $(subst _igraph.rds,_results.rds,$@) $(patsubst %spieceasi/bs_spieceasi_igraph.rds,%16S/asv_processed/BS_taxonomy_table.txt,$(patsubst %spieceasi/re_spieceasi_igraph.rds,%16S/asv_processed/RE_taxonomy_table.txt,$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%16S/asv_processed/RH_taxonomy_table.txt, $@))) $(patsubst %spieceasi/bs_spieceasi_igraph.rds,%ITS/asv_processed/BS_taxonomy_table.txt,$(patsubst %spieceasi/re_spieceasi_igraph.rds,%ITS/asv_processed/RE_taxonomy_table.txt,$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%ITS/asv_processed/RH_taxonomy_table.txt, $@))) $(METAB) $@
+
 network : data/processed/spieceasi/comb_16s_its_metab.txt\
-$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_RESULTS)
-
-# # Get input
-# SPIECEASI_IN_NAMES=bs re rh
-
-# SPIECEASI_IN_PATH=$(foreach path,$(SPIECEASI_IN_NAMES),data/processed/spieceasi/$(path))
-
-# # 16S
-# SPIECEASI_16S_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_16s_input.rds)
-
-# $(SPIECEASI_16S_IN) : code/get_input_for_spieceasi.R\
-# 		data/processed/spieceasi/comb_16s_its_metab.txt
-# 	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
-
-# # ITS inputs
-# SPIECEASI_ITS_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_its_input.rds)
-
-# $(SPIECEASI_ITS_IN) : code/get_input_for_spieceasi.R\
-# 		data/processed/spieceasi/comb_16s_its_metab.txt
-# 	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
-
-# # Metabolite inputs
-# SPIECEASI_METAB_IN=$(foreach path,$(SPIECEASI_IN_PATH),$(path)_metab_input.rds)
-
-# $(SPIECEASI_METAB_IN) : code/get_input_for_spieceasi.R\
-# 		data/processed/spieceasi/comb_16s_its_metab.txt
-# 	code/get_input_for_spieceasi.R data/processed/spieceasi/comb_16s_its_metab.txt $@
-
-# spieceasi : data/processed/spieceasi/comb_16s_its_metab.txt\
-# $(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_METAB_IN)
+$(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_RESULTS)\
+$(SPIECEASI_IGRAPH)
 
 #### Render final report ####
 
