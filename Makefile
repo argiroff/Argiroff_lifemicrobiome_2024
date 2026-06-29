@@ -893,9 +893,14 @@ $(SPIECEASI_IGRAPH) : code/convert_to_igraph.R\
 		$$(METAB)
 	code/convert_to_igraph.R $(subst _igraph.rds,_results.rds,$@) $(patsubst %spieceasi/bs_spieceasi_igraph.rds,%16S/asv_processed/BS_taxonomy_table.txt,$(patsubst %spieceasi/re_spieceasi_igraph.rds,%16S/asv_processed/RE_taxonomy_table.txt,$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%16S/asv_processed/RH_taxonomy_table.txt, $@))) $(patsubst %spieceasi/bs_spieceasi_igraph.rds,%ITS/asv_processed/BS_taxonomy_table.txt,$(patsubst %spieceasi/re_spieceasi_igraph.rds,%ITS/asv_processed/RE_taxonomy_table.txt,$(patsubst %spieceasi/rh_spieceasi_igraph.rds,%ITS/asv_processed/RH_taxonomy_table.txt, $@))) $(METAB) $@
 
+# Create network summary table
+results/network_stats.rds : code/summarize_network_stats.R\
+		$$(SPIECEASI_IGRAPH)
+	code/summarize_network_stats.R $(SPIECEASI_IGRAPH) $@
+
 network : data/processed/spieceasi/comb_16s_its_metab.txt\
 $(SPIECEASI_16S_IN) $(SPIECEASI_ITS_IN) $(SPIECEASI_RESULTS)\
-$(SPIECEASI_IGRAPH)
+$(SPIECEASI_IGRAPH) results/network_stats.rds
 
 #### Render final report ####
 
